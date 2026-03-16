@@ -19,7 +19,10 @@ const { SafeAreaView } = require('react-native-safe-area-context');
 const { Svg, Circle } = require('react-native-svg');
 const repository = require('./src/features/duty/repository');
 const settingsRepository = require('./src/features/settings/repository');
+const backupDataRepository = require('./src/features/backup/repository');
+const backupFileStore = require('./src/features/backup/file-store');
 const { DutyService, dateKeyFromDate } = require('./src/features/duty/service');
+const { BackupService, LAST_BACKUP_AT_KEY } = require('./src/features/backup/service');
 const {
   calculateRequirementProgress,
   formatTimeFromDate,
@@ -29,6 +32,7 @@ const {
 const { Ionicons } = require('@expo/vector-icons');
 
 const dutyService = new DutyService(repository);
+const backupService = new BackupService(backupDataRepository, backupFileStore, settingsRepository);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 function formatLongDate(value) {
@@ -221,10 +225,13 @@ function App() {
   const [savingEditEntry, setSavingEditEntry] = React.useState(false);
   const [deletingEntry, setDeletingEntry] = React.useState(false);
   const [savingSettings, setSavingSettings] = React.useState(false);
+  const [savingBackup, setSavingBackup] = React.useState(false);
+  const [restoringBackup, setRestoringBackup] = React.useState(false);
   const [error, setError] = React.useState('');
   const [toastMessage, setToastMessage] = React.useState('');
   const [toastType, setToastType] = React.useState('success');
   const [isDarkMode, setIsDarkMode] = React.useState(systemColorScheme !== 'light');
+  const [lastBackupAt, setLastBackupAt] = React.useState('');
 
   const [totalDurationMs, setTotalDurationMs] = React.useState(0);
   const [requiredHours, setRequiredHours] = React.useState(0);
@@ -261,6 +268,7 @@ function App() {
   const [editPmOut, setEditPmOut] = React.useState('');
   const [deleteConfirmVisible, setDeleteConfirmVisible] = React.useState(false);
   const [entryPendingDelete, setEntryPendingDelete] = React.useState(null);
+  const [restoreConfirmVisible, setRestoreConfirmVisible] = React.useState(false);
   const toastTimeoutRef = React.useRef(null);
   const progressAnim = React.useRef(new Animated.Value(0)).current;
   const openingPulse = React.useRef(new Animated.Value(0.5)).current;
@@ -296,7 +304,7 @@ function App() {
     async (targetDateKey, options) => {
       const { syncMainForm = true } = options || {};
       const currentDateKey = targetDateKey || dateKey;
-      const [totalMs, targetHours, hasRequiredSetting, recent, entryForDay, totalEntriesCount, themeMode] =
+      const [totalMs, targetHours, hasRequiredSetting, recent, entryForDay, totalEntriesCount, themeMode, latestBackupAt] =
         await Promise.all([
         dutyService.getTotalDurationMs(),
         settingsRepository.getRequiredHours(),
@@ -305,6 +313,7 @@ function App() {
         repository.getEntryByDate(currentDateKey),
         repository.countEntries(),
         settingsRepository.getThemeMode(),
+        settingsRepository.getSetting(LAST_BACKUP_AT_KEY),
       ]);
 
       const maxPage = Math.max(0, Math.ceil(totalEntriesCount / entriesPerPage) - 1);
@@ -317,6 +326,7 @@ function App() {
       setRequiredHours(targetHours);
       setHasRequiredHoursSetting(hasRequiredSetting);
       setIsDarkMode(themeMode === 'dark');
+      setLastBackupAt(latestBackupAt || '');
       setIsEditingRequiredHours((previous) => (hasRequiredSetting ? previous : true));
       setRecentEntries(recent);
       setTotalEntries(totalEntriesCount);
@@ -628,6 +638,58 @@ function App() {
     setError('');
     showToast('Required hours edit mode enabled.');
   };
+
+  const onExportBackup = async () => {
+    setError('');
+    setSavingBackup(true);
+    try {
+      const result = await backupService.exportBackup();
+      await refresh(dateKey, { syncMainForm: false });
+      const shared = await backupFileStore.shareBackup(result.latestPath);
+      showToast(
+        shared
+          ? `Backup exported (${result.entriesCount} entries).`
+          : `Backup saved locally (${result.entriesCount} entries).`,
+        'success'
+      );
+    } catch (exportError) {
+      setError(exportError.message);
+      showToast(exportError.message, 'error');
+    } finally {
+      setSavingBackup(false);
+    }
+  };
+
+  const onRequestRestoreBackup = () => {
+    if (restoringBackup) {
+      return;
+    }
+    setRestoreConfirmVisible(true);
+  };
+
+  const onCancelRestoreBackup = () => {
+    if (restoringBackup) {
+      return;
+    }
+    setRestoreConfirmVisible(false);
+  };
+
+  const onConfirmRestoreBackup = async () => {
+    setRestoreConfirmVisible(false);
+    setError('');
+    setRestoringBackup(true);
+    try {
+      const result = await backupService.restoreLatestBackup();
+      await refresh(dateKey);
+      showToast(`Backup restored (${result.entriesCount} entries).`);
+    } catch (restoreError) {
+      setError(restoreError.message);
+      showToast(restoreError.message, 'error');
+    } finally {
+      setRestoringBackup(false);
+    }
+  };
+
   const onToggleDarkMode = async () => {
     const nextIsDarkMode = !isDarkMode;
     setIsDarkMode(nextIsDarkMode);
@@ -720,10 +782,14 @@ function App() {
     : savingEditEntry
       ? 'Updating entry...'
       : deletingEntry
-        ? 'Deleting entry...'
-        : savingSettings
-          ? 'Saving settings...'
-          : '';
+          ? 'Deleting entry...'
+          : savingSettings
+            ? 'Saving settings...'
+            : savingBackup
+              ? 'Exporting backup...'
+              : restoringBackup
+                ? 'Restoring backup...'
+            : '';
 
   return (
     <Animated.View style={{ flex: 1, opacity: contentFade }}>
@@ -848,6 +914,46 @@ function App() {
                 </View>
               </Pressable>
             ) : null}
+
+            <View style={styles.sectionDivider} />
+            <Text style={[styles.targetLabel, !isDarkMode && styles.targetLabelLight]}>BACKUP & RESTORE</Text>
+            <Text style={[styles.backupHint, !isDarkMode && styles.backupHintLight]}>
+              Last backup: {lastBackupAt ? new Date(lastBackupAt).toLocaleString() : 'none yet'}
+            </Text>
+            <View style={styles.entryActions}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.entryActionButton,
+                  styles.backupActionButton,
+                  savingBackup || restoringBackup ? styles.disabledButton : null,
+                  pressed && !(savingBackup || restoringBackup) ? styles.pressedControl : null,
+                ]}
+                onPress={onExportBackup}
+                disabled={savingBackup || restoringBackup}
+                accessibilityLabel="Export JSON backup"
+              >
+                <View style={styles.buttonInline}>
+                  <Ionicons name={savingBackup ? 'sync-outline' : 'download-outline'} size={16} color="#ffffff" />
+                  <Text style={styles.buttonText}>{savingBackup ? 'Exporting...' : 'Export backup'}</Text>
+                </View>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.entryActionButton,
+                  styles.restoreActionButton,
+                  restoringBackup || savingBackup ? styles.disabledButton : null,
+                  pressed && !(restoringBackup || savingBackup) ? styles.pressedControl : null,
+                ]}
+                onPress={onRequestRestoreBackup}
+                disabled={restoringBackup || savingBackup}
+                accessibilityLabel="Restore latest backup"
+              >
+                <View style={styles.buttonInline}>
+                  <Ionicons name={restoringBackup ? 'sync-outline' : 'refresh-outline'} size={16} color="#ffffff" />
+                  <Text style={styles.buttonText}>{restoringBackup ? 'Restoring...' : 'Restore backup'}</Text>
+                </View>
+              </Pressable>
+            </View>
           </View>
 
           <View style={[...themedCard, styles.entryPanel]}>
@@ -1179,6 +1285,64 @@ function App() {
         </View>
       </Modal>
 
+      <Modal
+        visible={restoreConfirmVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={onCancelRestoreBackup}
+      >
+        <View style={styles.modalBackdrop}>
+          <Pressable
+            style={styles.modalBackdropTouch}
+            onPress={onCancelRestoreBackup}
+            disabled={restoringBackup}
+            accessibilityLabel="Close restore confirmation"
+          />
+          <View style={[styles.modalCard, isDarkMode ? styles.modalCardDark : null]}>
+            <View style={[styles.deleteWarningIconWrap, isDarkMode ? styles.deleteWarningIconWrapDark : null]}>
+              <Ionicons name="cloud-download-outline" size={24} color="#1f6feb" />
+            </View>
+            <Text style={[styles.modalTitle, isDarkMode ? styles.modalTitleDark : null]}>Restore latest backup?</Text>
+            <Text style={[styles.modalHint, isDarkMode ? styles.modalHintDark : null]}>
+              The app will create a snapshot first, then replace current records with the latest JSON backup.
+            </Text>
+            <View style={styles.entryActions}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.entryActionButton,
+                  styles.cancelEditButton,
+                  pressed && !restoringBackup ? styles.pressedControl : null,
+                ]}
+                onPress={onCancelRestoreBackup}
+                disabled={restoringBackup}
+                accessibilityLabel="Cancel restore backup"
+              >
+                <View style={styles.buttonInline}>
+                  <Ionicons name="close-circle-outline" size={16} color="#ffffff" />
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </View>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.entryActionButton,
+                  styles.restoreActionButton,
+                  restoringBackup ? styles.disabledButton : null,
+                  pressed && !restoringBackup ? styles.pressedControl : null,
+                ]}
+                onPress={onConfirmRestoreBackup}
+                disabled={restoringBackup}
+                accessibilityLabel="Confirm restore backup"
+              >
+                <View style={styles.buttonInline}>
+                  <Ionicons name={restoringBackup ? 'sync-outline' : 'refresh-outline'} size={16} color="#ffffff" />
+                  <Text style={styles.buttonText}>{restoringBackup ? 'Restoring...' : 'Restore now'}</Text>
+                </View>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {busyMessage ? (
         <View style={themedLoadingOverlay}>
           <View style={themedLoadingCard}>
@@ -1413,6 +1577,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   paginationTextLight: { color: '#5e6a73' },
+  backupHint: {
+    fontSize: 12,
+    color: '#9ca3af',
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  backupHintLight: { color: '#5e6a73' },
   entryActionButton: {
     flex: 1,
     borderRadius: 10,
@@ -1422,6 +1593,12 @@ const styles = StyleSheet.create({
   },
   editActionButton: {
     backgroundColor: '#0ea5e9',
+  },
+  backupActionButton: {
+    backgroundColor: '#1f6feb',
+  },
+  restoreActionButton: {
+    backgroundColor: '#7c3aed',
   },
   deleteActionButton: {
     backgroundColor: '#d9483b',

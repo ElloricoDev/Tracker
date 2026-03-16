@@ -31,6 +31,11 @@ An offline mobile app for tracking OJT duty hours using manual AM/PM time entrie
   - Paged logs (10 entries per page) with Previous/Next navigation
   - Edit any entry in a modal form
   - Delete any entry
+- Backup and restore (v2)
+  - Export local data to versioned JSON backup
+  - Creates local backup archive and stores latest backup metadata
+  - Restore from latest backup with snapshot-first safety
+  - Automatic rollback to snapshot if restore fails
 
 ## Run
 
@@ -45,7 +50,13 @@ Then open in Expo Go, Android emulator, iOS simulator (macOS), or web.
 
 ```bash
 npm run test
-```
+
+## Backup/Restore notes
+
+- Backups are saved in app storage (`documentDirectory/ojt-backups`).
+- `Export backup` attempts to open share sheet to save/send JSON.
+- `Restore backup` restores from `latest-backup.json` and first creates a snapshot.
+- If restore fails, app automatically rolls back to the snapshot.
 
 ## Deploy (Android, EAS)
 
@@ -61,10 +72,16 @@ eas login
 - `expo.android.package` (example: `com.school.ojttracker`)
 - `expo.ios.bundleIdentifier` (if you will also deploy iOS)
 
-3. Build production Android app:
+3. Build production Android app bundle (recommended smaller store download size):
 
 ```bash
 eas build --platform android --profile production
+```
+
+For internal testing APK:
+
+```bash
+eas build --platform android --profile preview
 ```
 
 4. Submit to Google Play (after build is finished):

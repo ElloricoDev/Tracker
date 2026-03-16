@@ -21,29 +21,18 @@ function normalizeRequiredHours(value) {
 }
 
 async function getRequiredHours() {
-  const db = await getDb();
-  const row = await db.getFirstAsync(
-    `SELECT value FROM app_settings WHERE key = ? LIMIT 1`,
-    [REQUIRED_HOURS_KEY]
-  );
+  const row = await getSetting(REQUIRED_HOURS_KEY);
 
   if (!row) {
     return DEFAULT_REQUIRED_HOURS;
   }
 
-  return normalizeRequiredHours(row.value);
+  return normalizeRequiredHours(row);
 }
 
 async function setRequiredHours(requiredHours) {
-  const db = await getDb();
   const normalizedValue = normalizeRequiredHours(requiredHours);
-
-  await db.runAsync(
-    `INSERT INTO app_settings (key, value)
-     VALUES (?, ?)
-     ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
-    [REQUIRED_HOURS_KEY, String(normalizedValue)]
-  );
+  await setSetting(REQUIRED_HOURS_KEY, String(normalizedValue));
 
   return normalizedValue;
 }
@@ -58,30 +47,52 @@ async function hasRequiredHoursSetting() {
 }
 
 async function getThemeMode() {
-  const db = await getDb();
-  const row = await db.getFirstAsync(
-    `SELECT value FROM app_settings WHERE key = ? LIMIT 1`,
-    [THEME_MODE_KEY]
-  );
-  return row && row.value === 'light' ? 'light' : 'dark';
+  const value = await getSetting(THEME_MODE_KEY);
+  return value === 'light' ? 'light' : 'dark';
 }
 
 async function setThemeMode(mode) {
   const normalizedMode = mode === 'light' ? 'light' : 'dark';
+  await setSetting(THEME_MODE_KEY, normalizedMode);
+  return normalizedMode;
+}
+
+async function getSetting(key) {
+  const db = await getDb();
+  const row = await db.getFirstAsync(
+    `SELECT value FROM app_settings WHERE key = ? LIMIT 1`,
+    [key]
+  );
+  return row ? row.value : null;
+}
+
+async function setSetting(key, value) {
   const db = await getDb();
   await db.runAsync(
     `INSERT INTO app_settings (key, value)
      VALUES (?, ?)
      ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
-    [THEME_MODE_KEY, normalizedMode]
+    [key, String(value)]
   );
-  return normalizedMode;
+}
+
+async function listAllSettings() {
+  const db = await getDb();
+  const rows = await db.getAllAsync(
+    `SELECT key, value
+     FROM app_settings
+     ORDER BY key ASC`
+  );
+  return rows.map((row) => ({ key: row.key, value: row.value }));
 }
 
 module.exports = {
+  getSetting,
   getThemeMode,
   getRequiredHours,
   hasRequiredHoursSetting,
+  listAllSettings,
+  setSetting,
   setThemeMode,
   setRequiredHours,
 };
