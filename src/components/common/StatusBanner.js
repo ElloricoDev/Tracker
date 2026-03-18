@@ -7,6 +7,7 @@ const AppIcon = require('./AppIcon');
 function StatusBanner({
   tone = 'info',
   message,
+  style,
 }) {
   const { theme } = useTheme();
 
@@ -41,6 +42,7 @@ function StatusBanner({
           backgroundColor: toneStyles.backgroundColor,
           borderColor: toneStyles.borderColor,
         },
+        style,
       ]}
     >
       <AppIcon name={toneStyles.icon} size="inline" color={toneStyles.color} />
@@ -59,7 +61,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: designTokens.borderRadius.md,
     paddingHorizontal: designTokens.spacing.md,
-    paddingVertical: designTokens.spacing.sm,
+    paddingVertical: designTokens.spacing.xs + 2,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 10,

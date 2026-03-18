@@ -81,23 +81,26 @@ function DutyEntryForm({
         </View>
       )}
       
-      <Button
-        variant="primary"
-        onPress={onSubmit}
-        loading={loading}
-        disabled={loading || disabled}
-        icon={<AppIcon name="save" size="action" color="#ffffff" />}
-        style={styles.submitButton}
-      >
-        {loading ? 'Saving...' : disabled ? 'Already Added' : 'Save Entry'}
-      </Button>
-      
-      {disabled && (
-        <StatusBanner
-          tone="info"
-          message="This date already has an entry. Edit it below instead of saving a duplicate."
-        />
-      )}
+      <View style={styles.formFooter}>
+        <Button
+          variant="primary"
+          onPress={onSubmit}
+          loading={loading}
+          disabled={loading || disabled}
+          icon={<AppIcon name="save" size="action" color="#ffffff" />}
+          style={styles.submitButton}
+        >
+          {loading ? 'Saving...' : disabled ? 'Already Added' : 'Save Entry'}
+        </Button>
+
+        {disabled ? (
+          <StatusBanner
+            tone="info"
+            message="This date already has an entry. Edit it below instead of saving a duplicate."
+            style={styles.disabledBanner}
+          />
+        ) : null}
+      </View>
     </SectionCard>
   );
 }
@@ -119,8 +122,16 @@ const styles = StyleSheet.create({
   error: {
     fontSize: 13,
   },
+  formFooter: {
+    gap: designTokens.spacing.md,
+    paddingTop: designTokens.spacing.md,
+    paddingBottom: designTokens.spacing.xs,
+  },
   submitButton: {
-    marginTop: designTokens.spacing.sm,
+    marginTop: 0,
+  },
+  disabledBanner: {
+    marginTop: designTokens.spacing.md,
   },
 });
 

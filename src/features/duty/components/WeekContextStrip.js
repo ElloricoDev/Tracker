@@ -181,8 +181,9 @@ const styles = StyleSheet.create({
   statusCard: {
     borderWidth: 1,
     borderRadius: designTokens.borderRadius.md,
+    marginTop: designTokens.spacing.xs,
     paddingHorizontal: designTokens.spacing.lg,
-    paddingVertical: designTokens.spacing.sm,
+    paddingVertical: designTokens.spacing.md,
     gap: 4,
   },
   statusTitle: {

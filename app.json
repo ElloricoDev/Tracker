@@ -4,45 +4,45 @@
     "slug": "tracker",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/mobile.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/mobile.png",
       "imageWidth": 240,
       "resizeMode": "contain",
       "backgroundColor": "#f7faff",
       "dark": {
-        "image": "./assets/splash-icon-dark.png",
+        "image": "./assets/mobile.png",
         "backgroundColor": "#0b1220"
       }
     },
     "ios": {
       "supportsTablet": true,
       "splash": {
-        "image": "./assets/splash-icon.png",
+        "image": "./assets/mobile.png",
         "imageWidth": 240,
         "resizeMode": "contain",
         "backgroundColor": "#f7faff",
         "dark": {
-          "image": "./assets/splash-icon-dark.png",
+          "image": "./assets/mobile.png",
           "backgroundColor": "#0b1220"
         }
       }
     },
     "android": {
       "splash": {
-        "image": "./assets/splash-icon.png",
+        "image": "./assets/mobile.png",
         "imageWidth": 240,
         "resizeMode": "contain",
         "backgroundColor": "#f7faff",
         "dark": {
-          "image": "./assets/splash-icon-dark.png",
+          "image": "./assets/mobile.png",
           "backgroundColor": "#0b1220"
         }
       },
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
+        "foregroundImage": "./assets/mobile.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
@@ -56,12 +56,12 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/splash-icon.png",
+          "image": "./assets/mobile.png",
           "imageWidth": 240,
           "resizeMode": "contain",
           "backgroundColor": "#f7faff",
           "dark": {
-            "image": "./assets/splash-icon-dark.png",
+            "image": "./assets/mobile.png",
             "backgroundColor": "#0b1220"
           }
         }
