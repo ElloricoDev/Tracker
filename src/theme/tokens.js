@@ -216,11 +216,11 @@ const designTokens = {
   // Grid and layout
   layout: {
     containerPadding: 20,
-    screenPadding: 20,
-    cardPadding: 16,
-    sectionGap: 16,
+    screenPadding: 18,
+    cardPadding: 18,
+    sectionGap: 18,
     contentGap: 12,
-    headerGap: 16,
+    headerGap: 14,
   },
 
   effects: {

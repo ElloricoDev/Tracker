@@ -15,7 +15,12 @@ const ActionRow = require('../../../components/common/ActionRow');
 const EmptyState = require('../../../components/common/EmptyState');
 const Button = require('../../../components/common/Button');
 const AppIcon = require('../../../components/common/AppIcon');
+const DashboardStat = require('../components/DashboardStat');
 const ProgressSection = require('../components/ProgressSection');
+const MonthlyAttendanceHeatmap = require('../components/MonthlyAttendanceHeatmap');
+const TrendBarChart = require('../components/TrendBarChart');
+const { dateKeyFromDate } = require('../service');
+const { startOfLocalWeekMonday } = require('../time');
 
 function formatHoursAndMinutes(ms) {
   const totalMinutes = Math.max(0, Math.floor(ms / 60000));
@@ -27,6 +32,18 @@ function formatHoursAndMinutes(ms) {
 function formatLongDate(dateKey) {
   return new Date(`${dateKey}T12:00:00`).toLocaleDateString('en-US', {
     month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function formatShortDate(dateKey) {
+  if (!dateKey) {
+    return 'Need more logs';
+  }
+
+  return new Date(`${dateKey}T12:00:00`).toLocaleDateString('en-US', {
+    month: 'short',
     day: 'numeric',
     year: 'numeric',
   });
@@ -48,37 +65,13 @@ function buildSessionSummary(entry) {
   return sessions.length > 0 ? sessions.join('  •  ') : 'Incomplete session saved.';
 }
 
-function DashboardStat({ label, value, tone = 'default' }) {
-  const { theme } = useTheme();
-
-  const valueColor = tone === 'warning'
-    ? theme.colors.warning
-    : tone === 'success'
-      ? theme.colors.success
-      : theme.colors.text;
-
-  return (
-    <View
-      style={[
-        styles.statCard,
-        {
-          backgroundColor: theme.colors.surfaceContainer || theme.colors.surface,
-          borderColor: theme.colors.borderLight || theme.colors.border,
-        },
-      ]}
-    >
-      <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>{label}</Text>
-      <Text style={[styles.statValue, { color: valueColor }]}>{value}</Text>
-    </View>
-  );
-}
-
 function HomeScreen({
   navigation,
   totalDurationMs,
   requiredHours,
   recentEntries = [],
   todayEntry = null,
+  dashboardInsights = null,
   onRefresh,
 }) {
   const { theme } = useTheme();
@@ -90,6 +83,18 @@ function HomeScreen({
   );
 
   const remainingMs = Math.max(0, (requiredHours * 3600000) - totalDurationMs);
+  const todayDateKey = dateKeyFromDate(new Date());
+  const currentWeekStartDateKey = dateKeyFromDate(startOfLocalWeekMonday(new Date()));
+  const handleSelectDashboardDate = React.useCallback((selectedDateKey) => {
+    navigation.navigate('Entries', { selectedDateKey, entryContextSource: 'dashboard' });
+  }, [navigation]);
+  const handleOpenDashboardWeek = React.useCallback((selectedDateKey) => {
+    navigation.navigate('Entries', {
+      selectedDateKey,
+      entryContextSource: 'dashboard',
+      entryContextMode: 'week',
+    });
+  }, [navigation]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
@@ -101,7 +106,7 @@ function HomeScreen({
         <ScreenHeader
           eyebrow="Dashboard"
           title="OJT Hours Tracker"
-          subtitle="Track progress quickly, then jump straight into today’s duty record."
+          subtitle="Check progress, spot gaps, and jump straight into the day you want to manage."
         />
 
         <ProgressSection
@@ -112,7 +117,7 @@ function HomeScreen({
 
         <SectionCard
           title="Summary"
-          subtitle="Your current standing at a glance."
+          subtitle="The key numbers that matter right now."
           icon="summary"
         >
           <View style={styles.statsGrid}>
@@ -127,8 +132,122 @@ function HomeScreen({
         </SectionCard>
 
         <SectionCard
+          title="Monthly Insights"
+          subtitle="Pace, streak, forecast, and attendance in one place."
+          icon="calendarStats"
+        >
+          <View style={styles.statsGrid}>
+            <DashboardStat
+              label="This Month"
+              value={formatHoursAndMinutes(dashboardInsights ? dashboardInsights.monthlyTotalMs : 0)}
+            />
+            <DashboardStat
+              label="Duty Days"
+              value={String(dashboardInsights ? dashboardInsights.monthlyEntryCount : 0)}
+            />
+            <DashboardStat
+              label="Avg / Day"
+              value={formatHoursAndMinutes(dashboardInsights ? dashboardInsights.monthlyAverageMs : 0)}
+            />
+            <DashboardStat
+              label="Missing Days"
+              value={String(dashboardInsights ? dashboardInsights.missedDays : 0)}
+              tone={dashboardInsights && dashboardInsights.missedDays > 0 ? 'warning' : 'success'}
+            />
+          </View>
+
+          <View style={styles.insightHighlights}>
+            <View
+              style={[
+                styles.insightCard,
+                {
+                  backgroundColor: theme.colors.surfaceContainer || theme.colors.surface,
+                  borderColor: theme.colors.borderLight || theme.colors.border,
+                },
+              ]}
+            >
+              <View style={styles.insightHeading}>
+                <AppIcon name="streak" size="inline" color={theme.colors.warning} />
+                <Text style={[styles.insightLabel, { color: theme.colors.textSecondary }]}>Current Streak</Text>
+              </View>
+              <Text style={[styles.insightValue, { color: theme.colors.text }]}>
+                {dashboardInsights ? dashboardInsights.currentStreakDays : 0} day{dashboardInsights && dashboardInsights.currentStreakDays === 1 ? '' : 's'}
+              </Text>
+              <Text style={[styles.insightMeta, { color: theme.colors.textTertiary }]}>
+                Best streak: {dashboardInsights ? dashboardInsights.longestStreakDays : 0} day{dashboardInsights && dashboardInsights.longestStreakDays === 1 ? '' : 's'}
+              </Text>
+            </View>
+
+            <View
+              style={[
+                styles.insightCard,
+                {
+                  backgroundColor: theme.colors.surfaceContainer || theme.colors.surface,
+                  borderColor: theme.colors.borderLight || theme.colors.border,
+                },
+              ]}
+            >
+              <View style={styles.insightHeading}>
+                <AppIcon name="forecast" size="inline" color={theme.colors.primary} />
+                <Text style={[styles.insightLabel, { color: theme.colors.textSecondary }]}>Projected Finish</Text>
+              </View>
+              <Text style={[styles.insightValue, { color: theme.colors.text }]}>
+                {formatShortDate(dashboardInsights ? dashboardInsights.projectedCompletionDateKey : null)}
+              </Text>
+              <Text style={[styles.insightMeta, { color: theme.colors.textTertiary }]}>
+                Estimated from your average logged hours per duty day.
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.calendarWrap}>
+            <MonthlyAttendanceHeatmap
+              calendar={dashboardInsights ? dashboardInsights.monthCalendar : null}
+              onSelectDate={handleSelectDashboardDate}
+            />
+            <Text style={[styles.calendarHint, { color: theme.colors.textSecondary }]}>
+              Tap a day to open it in Entries. Stronger fill means more logged hours.
+            </Text>
+          </View>
+
+          <View style={styles.trendsWrap}>
+            <TrendBarChart
+              title="This Week"
+              subtitle="Daily logged hours across the current week."
+              bars={dashboardInsights ? dashboardInsights.weeklyTrend : []}
+              onSelectBar={handleSelectDashboardDate}
+            />
+            <TrendBarChart
+              title="This Month"
+              subtitle="Weekly pace across the current month."
+              bars={dashboardInsights ? dashboardInsights.monthlyTrend : []}
+              onSelectBar={handleSelectDashboardDate}
+            />
+          </View>
+
+          <ActionRow style={styles.drilldownActions}>
+            <Button
+              variant="secondary"
+              size="small"
+              onPress={() => handleSelectDashboardDate(todayDateKey)}
+              icon={<AppIcon name="date" size="inline" color={theme.colors.text} />}
+            >
+              Jump to Today
+            </Button>
+            <Button
+              variant="secondary"
+              size="small"
+              onPress={() => handleOpenDashboardWeek(currentWeekStartDateKey)}
+              icon={<AppIcon name="calendarStats" size="inline" color={theme.colors.text} />}
+            >
+              Open This Week
+            </Button>
+          </ActionRow>
+        </SectionCard>
+
+        <SectionCard
           title="Today"
-          subtitle={todayEntry ? 'You already have a record for today.' : 'No entry has been saved for today yet.'}
+          subtitle={todayEntry ? 'Today already has a saved record.' : 'No record has been saved for today yet.'}
           icon="quickAction"
         >
           <Text style={[styles.todayCopy, { color: theme.colors.textSecondary }]}>
@@ -146,7 +265,7 @@ function HomeScreen({
 
         <SectionCard
           title="Recent Activity"
-          subtitle="Your latest saved duty records."
+          subtitle="Your latest saved records."
           icon="activity"
         >
           {recentEntries.length === 0 ? (
@@ -178,7 +297,7 @@ function HomeScreen({
                   <Button
                     variant="secondary"
                     size="small"
-                    onPress={() => navigation.navigate('Entries')}
+                    onPress={() => handleSelectDashboardDate(entry.dateKey)}
                     icon={<AppIcon name="next" size="inline" color={theme.colors.text} />}
                     iconPosition="right"
                   >
@@ -209,23 +328,51 @@ const styles = StyleSheet.create({
   statsGrid: {
     gap: designTokens.spacing.sm,
   },
-  statCard: {
+  insightHighlights: {
+    gap: designTokens.spacing.sm,
+    marginTop: designTokens.spacing.md,
+  },
+  insightCard: {
     borderWidth: 1,
     borderRadius: designTokens.borderRadius.lg,
-    padding: designTokens.spacing.md,
-    gap: 2,
+    padding: designTokens.spacing.lg,
+    gap: designTokens.spacing.sm,
   },
-  statLabel: {
+  insightHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: designTokens.spacing.xs,
+  },
+  insightLabel: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
-  statValue: {
+  insightValue: {
     fontSize: 22,
     fontWeight: '800',
   },
+  insightMeta: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  calendarWrap: {
+    gap: designTokens.spacing.sm,
+    marginTop: designTokens.spacing.md,
+  },
+  calendarHint: {
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  trendsWrap: {
+    gap: designTokens.spacing.lg,
+    marginTop: designTokens.spacing.md,
+  },
+  drilldownActions: {
+    marginTop: designTokens.spacing.md,
+  },
   todayCopy: {
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 21,
   },
   actionRow: {
     marginTop: designTokens.spacing.md,
@@ -236,7 +383,7 @@ const styles = StyleSheet.create({
   activityItem: {
     borderWidth: 1,
     borderRadius: designTokens.borderRadius.lg,
-    padding: designTokens.spacing.md,
+    padding: designTokens.spacing.lg,
     gap: designTokens.spacing.sm,
   },
   activityCopy: {

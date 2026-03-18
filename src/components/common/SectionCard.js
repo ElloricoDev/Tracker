@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: designTokens.spacing.md,
-    marginBottom: designTokens.spacing.md,
+    marginBottom: designTokens.spacing.lg,
   },
   heading: {
     flex: 1,
@@ -62,15 +62,15 @@ const styles = StyleSheet.create({
   },
   headerText: {
     flex: 1,
-    gap: 2,
+    gap: 4,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 19,
+    fontWeight: '800',
   },
   subtitle: {
     fontSize: 13,
-    lineHeight: 18,
+    lineHeight: 19,
   },
 });
 

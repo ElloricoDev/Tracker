@@ -204,3 +204,54 @@ test('updateEntry rejects moving to date with existing entry', async () => {
     /already exists/
   );
 });
+
+test('getDashboardInsights returns monthly stats, streaks, and forecast', async () => {
+  const repo = createMemoryRepository([
+    {
+      dateKey: '2026-03-15',
+      amIn: '8:00 AM',
+      amOut: '12:00 PM',
+      pmIn: '1:00 PM',
+      pmOut: '5:00 PM',
+      createdAt: '2026-03-15T00:00:00.000Z',
+      updatedAt: '2026-03-15T00:00:00.000Z',
+    },
+    {
+      dateKey: '2026-03-16',
+      amIn: '8:00 AM',
+      amOut: '12:00 PM',
+      pmIn: '1:00 PM',
+      pmOut: '5:00 PM',
+      createdAt: '2026-03-16T00:00:00.000Z',
+      updatedAt: '2026-03-16T00:00:00.000Z',
+    },
+    {
+      dateKey: '2026-03-18',
+      amIn: '8:00 AM',
+      amOut: '12:00 PM',
+      pmIn: '1:00 PM',
+      pmOut: '5:00 PM',
+      createdAt: '2026-03-18T00:00:00.000Z',
+      updatedAt: '2026-03-18T00:00:00.000Z',
+    },
+  ]);
+  const service = new DutyService(repo, () => new Date('2026-03-19T09:00:00.000'));
+
+  const insights = await service.getDashboardInsights(40, new Date('2026-03-19T09:00:00.000'));
+
+  assert.equal(insights.monthlyTotalMs, 24 * 60 * 60 * 1000);
+  assert.equal(insights.monthlyEntryCount, 3);
+  assert.equal(insights.monthlyAverageMs, 8 * 60 * 60 * 1000);
+  assert.equal(insights.missedDays, 16);
+  assert.equal(insights.currentStreakDays, 1);
+  assert.equal(insights.longestStreakDays, 2);
+  assert.equal(insights.projectedCompletionDateKey, '2026-03-20');
+  assert.equal(insights.monthCalendar.monthLabel, 'March 2026');
+  assert.equal(insights.monthCalendar.leadingEmptyDays, 0);
+  assert.equal(insights.monthCalendar.days.length, 31);
+  assert.equal(insights.monthCalendar.days[14].hasEntry, true);
+  assert.equal(insights.monthCalendar.days[19].isFuture, true);
+  assert.equal(insights.weeklyTrend.length, 7);
+  assert.equal(insights.weeklyTrend[2].totalMs, 8 * 60 * 60 * 1000);
+  assert.equal(insights.monthlyTrend[0].label, 'W1');
+});

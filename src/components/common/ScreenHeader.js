@@ -29,10 +29,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: designTokens.spacing.md,
+    marginBottom: designTokens.spacing.xs,
   },
   copy: {
     flex: 1,
-    gap: 4,
+    gap: 6,
   },
   eyebrow: {
     fontSize: 12,
@@ -41,13 +42,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '800',
-    lineHeight: 34,
+    lineHeight: 36,
   },
   subtitle: {
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 21,
+    maxWidth: 520,
   },
 });
 

@@ -101,6 +101,7 @@ function AppTabs({
             requiredHours={sharedState.requiredHours}
             recentEntries={sharedState.recentEntries}
             todayEntry={sharedState.todayEntry}
+            dashboardInsights={sharedState.dashboardInsights}
             onRefresh={onRefresh}
           />
         )}
@@ -140,6 +141,7 @@ function AppNavigator({ dutyService, settingsRepository, backupService }) {
     lastBackupAt: '',
     recentEntries: [],
     todayEntry: null,
+    dashboardInsights: null,
   });
 
   const handleRefresh = React.useCallback(async () => {
@@ -151,6 +153,7 @@ function AppNavigator({ dutyService, settingsRepository, backupService }) {
       dutyService.repository.listRecentEntries(3, 0),
       dutyService.repository.getEntryByDate(todayKey),
     ]);
+    const dashboardInsights = await dutyService.getDashboardInsights(targetHours);
 
     setSharedState({
       totalDurationMs: totalMs,
@@ -158,6 +161,7 @@ function AppNavigator({ dutyService, settingsRepository, backupService }) {
       lastBackupAt: latestBackupAt || '',
       recentEntries,
       todayEntry,
+      dashboardInsights,
     });
   }, [dutyService, settingsRepository]);
 
