@@ -7,11 +7,12 @@ const React = require('react');
 const { View, Text, StyleSheet } = require('react-native');
 const { useTheme } = require('../../../hooks/useTheme');
 const { designTokens } = require('../../../theme/tokens');
-const Card = require('../../../components/common/Card');
 const Button = require('../../../components/common/Button');
+const SectionCard = require('../../../components/common/SectionCard');
+const StatusBanner = require('../../../components/common/StatusBanner');
+const AppIcon = require('../../../components/common/AppIcon');
 const DatePickerButton = require('../../../components/form/DatePickerButton');
 const SessionTimeFields = require('../../../components/form/SessionTimeFields');
-const { Ionicons } = require('@expo/vector-icons');
 
 /**
  * DutyEntryForm component
@@ -41,11 +42,6 @@ function DutyEntryForm({
 }) {
   const { theme } = useTheme();
   
-  const titleStyles = React.useMemo(() => ({
-    color: theme.colors.text,
-    ...styles.title,
-  }), [theme]);
-  
   const labelStyles = React.useMemo(() => ({
     color: theme.colors.textSecondary,
     ...styles.label,
@@ -56,24 +52,12 @@ function DutyEntryForm({
     ...styles.error,
   }), [theme]);
   
-  const infoStyles = React.useMemo(() => ({
-    backgroundColor: theme.colors.infoBg,
-    borderColor: theme.colors.info,
-    ...styles.infoBanner,
-  }), [theme]);
-  
-  const infoTextStyles = React.useMemo(() => ({
-    color: theme.colors.info,
-    ...styles.infoText,
-  }), [theme]);
-  
   return (
-    <Card elevation="medium">
-      <View style={styles.header}>
-        <Ionicons name="calendar-outline" size={18} color={theme.colors.icon} />
-        <Text style={titleStyles}>Daily Entry</Text>
-      </View>
-      
+    <SectionCard
+      title="Duty Entry"
+      subtitle="Select a day and log your morning and afternoon sessions."
+      icon="date"
+    >
       <View style={styles.formField}>
         <Text style={labelStyles}>Date</Text>
         <DatePickerButton
@@ -102,34 +86,23 @@ function DutyEntryForm({
         onPress={onSubmit}
         loading={loading}
         disabled={loading || disabled}
-        icon={<Ionicons name={loading ? 'sync-outline' : 'save-outline'} size={18} color="#ffffff" />}
+        icon={<AppIcon name="save" size="action" color="#ffffff" />}
+        style={styles.submitButton}
       >
-        {loading ? 'Saving...' : disabled ? 'Already Added' : 'Add Time Entry'}
+        {loading ? 'Saving...' : disabled ? 'Already Added' : 'Save Entry'}
       </Button>
       
       {disabled && (
-        <View style={infoStyles}>
-          <Ionicons name="information-circle-outline" size={16} color={theme.colors.info} />
-          <Text style={infoTextStyles}>
-            This date is already in logs. Use Edit below to update it.
-          </Text>
-        </View>
+        <StatusBanner
+          tone="info"
+          message="This date already has an entry. Edit it below instead of saving a duplicate."
+        />
       )}
-    </Card>
+    </SectionCard>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: designTokens.spacing.md,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
   formField: {
     marginBottom: designTokens.spacing.md,
   },
@@ -140,23 +113,14 @@ const styles = StyleSheet.create({
   },
   errors: {
     gap: 4,
-    marginVertical: designTokens.spacing.sm,
+    marginTop: designTokens.spacing.sm,
+    marginBottom: designTokens.spacing.xs,
   },
   error: {
     fontSize: 13,
   },
-  infoBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    padding: designTokens.spacing.md,
-    borderRadius: designTokens.borderRadius.sm,
-    borderWidth: 1,
+  submitButton: {
     marginTop: designTokens.spacing.sm,
-  },
-  infoText: {
-    fontSize: 13,
-    flex: 1,
   },
 });
 

@@ -1,6 +1,6 @@
-# OJT Hours Duty Tracker - Neomorphism UI with Drawer Navigation
+# OJT Hours Duty Tracker - Modern Material UI with Drawer Navigation
 
-An offline mobile app for tracking OJT duty hours with a beautiful neomorphism design system, modern React architecture, and intuitive drawer navigation.
+An offline mobile app for tracking OJT duty hours with a modern Material-inspired design system, soft gradients, and intuitive drawer navigation.
 
 ## ✨ What's New - Refactored Architecture + Drawer Navigation
 
@@ -8,16 +8,17 @@ This app has been **completely refactored** from a monolithic 1797-line App.js i
 
 - **App.js:** 1797 lines → **59 lines** (97% reduction!)
 - **4 dedicated screens** (Home, Logs, Settings, Backup)
-- **Drawer navigation** with neomorphism styling
-- **28 reusable components** with neomorphism styling
+- **Drawer navigation** with Material styling
+- **28 reusable components** with reusable design tokens
 - **Complete design system** with light/dark themes
 - **All tests passing** (25/25)
 - **Performance optimized** with React.memo, useCallback, useMemo
 
-## 🎨 Neomorphism Design System
+## 🎨 Modern Design System
 
-Beautiful soft UI design with:
-- Dual light/dark shadows for depth
+Clean, modern UI design with:
+- Material-inspired surface hierarchy
+- Soft gradient-toned backgrounds
 - Tactile press animations
 - Smooth transitions
 - Consistent spacing and typography
@@ -40,7 +41,7 @@ Each screen has a hamburger menu button to access the drawer, and the active scr
 - React Native (Expo)
 - React Navigation v7 (Drawer)
 - SQLite (`expo-sqlite`)
-- Custom neomorphism components
+- Custom reusable UI components
 - Context-based theme system
 - Local-only storage (no cloud sync)
 
@@ -75,8 +76,8 @@ AppNavigator (Drawer)
 ```
 src/
 ├── navigation/         # AppNavigator with drawer config
-├── theme/             # Neomorphism theme system
-├── hooks/             # useTheme, useToast, useNeomorphismAnimation
+├── theme/             # Material-inspired theme system
+├── hooks/             # useTheme, useToast, animation hooks
 ├── components/
 │   ├── common/        # Button, Card, Modal, Toast, etc.
 │   └── form/          # Input, DatePicker, TimePicker, SessionFields
@@ -111,7 +112,7 @@ src/
 
 - `useTheme` - Theme context with light/dark mode
 - `useToast` - Toast notifications
-- `useNeomorphismAnimation` - Press, fade, pulse, slide animations
+- `useNeomorphismAnimation` - Press, fade, pulse, slide animations (legacy hook name)
 - `useSessionForm` - Session time form state management
 
 ## Run
@@ -135,16 +136,16 @@ All 25 tests passing ✅
 
 ### Colors
 
-**Light Theme:** Base #e0e5ec with soft shadows  
-**Dark Theme:** Base #1a1f2e with subtle highlights  
-**Primary:** Blue (#5e81f4 / #7c9aff)  
+**Light Theme:** Base #f4f7fe with layered surfaces  
+**Dark Theme:** Base #0b1220 with elevated containers  
+**Primary:** Blue (#365edc / #8fa9ff)  
 **Accent Colors:** Success, Warning, Error
 
 ### Elevations
 
 - `flat` - No shadow
 - `low` - Subtle depth
-- `medium` - Standard neomorphism (default)
+- `medium` - Standard elevated surface (default)
 - `high` - Prominent depth
 - `floating` - Elevated floating effect
 
@@ -232,7 +233,7 @@ eas submit --platform android --profile production
 ✅ **Consistency:** Unified design system  
 ✅ **Performance:** Optimized rendering  
 ✅ **Developer Experience:** Easy to understand and extend  
-✅ **User Experience:** Beautiful neomorphism UI  
+✅ **User Experience:** Modern, clean, and readable UI  
 ✅ **Scalability:** Easy to add new features  
 
 ## Performance Optimizations

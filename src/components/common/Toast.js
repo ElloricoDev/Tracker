@@ -1,6 +1,6 @@
 /**
  * Toast Notification Component
- * Displays temporary notifications with neomorphism styling
+ * Displays temporary notifications with material styling.
  */
 
 const React = require('react');
@@ -11,7 +11,7 @@ const { getElevationStyle, designTokens } = require('../../theme/tokens');
 const { Ionicons } = require('@expo/vector-icons');
 
 /**
- * Toast component with neomorphism styling
+ * Toast component with reusable material styling
  * @param {object} props
  * @param {string} props.message - Toast message
  * @param {string} props.type - 'success', 'error', 'info', or 'warning'
@@ -41,17 +41,6 @@ function Toast({
     warning: theme.colors.warning,
   };
   
-  const toastStyles = React.useMemo(() => {
-    return [
-      styles.toast,
-      {
-        backgroundColor: theme.colors.surfaceElevated,
-      },
-      getElevationStyle('floating', isDarkMode),
-      style,
-    ];
-  }, [theme, isDarkMode, style]);
-  
   const textStyles = React.useMemo(() => {
     return [
       styles.text,
@@ -64,17 +53,29 @@ function Toast({
   if (!visible && !message) {
     return null;
   }
+
+  const toastStyles = [
+    styles.toast,
+    {
+      backgroundColor: theme.colors.surfaceElevated,
+      borderColor: theme.colors.outline || theme.colors.border,
+    },
+    getElevationStyle('floating', isDarkMode),
+    style,
+  ];
   
   return (
-    <Animated.View style={[toastStyles, animatedStyle, styles.toastContainer]}>
-      <View style={styles.content}>
-        <Ionicons
-          name={icons[type]}
-          size={20}
-          color={iconColors[type]}
-          style={styles.icon}
-        />
-        <Text style={textStyles}>{message}</Text>
+    <Animated.View style={[styles.toastContainer, animatedStyle]}>
+      <View style={toastStyles}>
+        <View style={styles.content}>
+          <Ionicons
+            name={icons[type]}
+            size={20}
+            color={iconColors[type]}
+            style={styles.icon}
+          />
+          <Text style={textStyles}>{message}</Text>
+        </View>
       </View>
     </Animated.View>
   );
@@ -90,6 +91,7 @@ const styles = StyleSheet.create({
   },
   toast: {
     borderRadius: designTokens.borderRadius.md,
+    borderWidth: 1,
     paddingHorizontal: 16,
     paddingVertical: 14,
     maxWidth: '100%',

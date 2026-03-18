@@ -192,9 +192,20 @@ const designTokens = {
   
   // Standard sizes for components
   sizes: {
-    iconButton: 40,
-    button: 44,
-    input: 48,
+    badge: 32,
+    iconButton: 44,
+    touchTarget: 44,
+    button: 46,
+    input: 50,
+    headerAction: 40,
+    tabBarHeight: 68,
+    icon: {
+      navigation: 22,
+      section: 18,
+      action: 18,
+      inline: 16,
+      hero: 28,
+    },
     card: {
       small: 120,
       medium: 240,
@@ -205,9 +216,16 @@ const designTokens = {
   // Grid and layout
   layout: {
     containerPadding: 20,
+    screenPadding: 20,
     cardPadding: 16,
     sectionGap: 16,
     contentGap: 12,
+    headerGap: 16,
+  },
+
+  effects: {
+    tintStrong: 0.16,
+    tintSoft: 0.08,
   },
 };
 

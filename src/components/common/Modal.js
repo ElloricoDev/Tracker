@@ -61,11 +61,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
-    padding: 20,
+    padding: designTokens.layout.containerPadding,
   },
   modalCard: {
     borderRadius: designTokens.borderRadius.lg,
-    padding: 20,
+    padding: designTokens.layout.cardPadding,
     maxHeight: '88%',
     borderWidth: 1,
   },
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 999,
     backgroundColor: '#d0d7de',
-    marginBottom: 8,
+    marginBottom: designTokens.spacing.sm,
   },
 });
 

@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 6,
   },
   clearText: {
     fontSize: 13,
@@ -153,10 +153,12 @@ const styles = StyleSheet.create({
   },
   timeRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: designTokens.spacing.md,
   },
   timeField: {
     flex: 1,
+    minWidth: 140,
     gap: designTokens.spacing.xs,
   },
   hint: {

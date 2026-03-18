@@ -1,6 +1,6 @@
 /**
  * Icon Button Component
- * Reusable icon button with neomorphism styling
+ * Reusable icon button with material styling.
  */
 
 const React = require('react');
@@ -30,7 +30,7 @@ function IconButton({
   accessibilityLabel,
 }) {
   const { theme, isDarkMode } = useTheme();
-  const { animatedValue, handlePressIn, handlePressOut, animatedStyle } = useNeomorphismPress();
+  const { handlePressIn, handlePressOut, animatedStyle } = useNeomorphismPress();
   
   const buttonStyles = React.useMemo(() => {
     const sizeStyles = {
@@ -42,14 +42,15 @@ function IconButton({
     return [
       styles.button,
       {
-        backgroundColor: theme.colors.surface,
+        backgroundColor: theme.colors.surfaceContainerHighest || theme.colors.surfaceContainer || theme.colors.surface,
+        borderWidth: 1,
+        borderColor: theme.colors.outline || theme.colors.border,
       },
       variant === 'flat' ? styles.flatButton : getElevationStyle('medium', isDarkMode),
       sizeStyles[size],
       disabled && styles.disabled,
-      style,
     ];
-  }, [theme, isDarkMode, size, disabled, variant, style]);
+  }, [theme, isDarkMode, size, disabled, variant]);
 
   const iconElement = React.useMemo(() => {
     if (React.isValidElement(icon)) {
@@ -70,7 +71,7 @@ function IconButton({
   }, [icon, size, theme]);
   
   return (
-    <Animated.View style={animatedStyle}>
+    <Animated.View style={[animatedStyle, style]}>
       <Pressable
         style={buttonStyles}
         onPress={onPress}
@@ -93,18 +94,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonSmall: {
-    width: 32,
-    height: 32,
+    width: designTokens.sizes.touchTarget,
+    height: designTokens.sizes.touchTarget,
   },
   buttonMedium: {
-    width: 40,
-    height: 40,
+    width: designTokens.sizes.iconButton,
+    height: designTokens.sizes.iconButton,
   },
   buttonLarge: {
-    width: 48,
-    height: 48,
+    width: 52,
+    height: 52,
   },
   flatButton: {
+    backgroundColor: 'transparent',
+    borderColor: 'transparent',
     shadowOpacity: 0,
     elevation: 0,
   },

@@ -1,6 +1,6 @@
 /**
- * Neomorphism Theme System
- * Provides color palettes, shadows, spacing, and typography for neomorphism design
+ * Material-inspired Theme System
+ * Provides color palettes, shadows, spacing, and typography.
  */
 
 const lightTheme = {
@@ -8,39 +8,44 @@ const lightTheme = {
   
   colors: {
     // Background colors
-    background: '#e0e5ec',
-    surface: '#e0e5ec',
-    surfaceElevated: '#e8edf4',
+    background: '#f3faf6',
+    surface: '#ffffff',
+    surfaceElevated: '#ffffff',
+    surfaceContainer: '#e4f3ea',
+    surfaceContainerHigh: '#d8ecdf',
+    surfaceContainerHighest: '#cde5d6',
     
     // Primary colors
-    primary: '#5e81f4',
-    primaryDark: '#4a67d9',
-    primaryLight: '#7c9aff',
+    primary: '#1f8a4d',
+    primaryDark: '#17663a',
+    primaryLight: '#57b97c',
     
     // Accent colors
-    accent: '#7c3aed',
-    success: '#10b981',
+    accent: '#0f766e',
+    success: '#159957',
     warning: '#f59e0b',
     error: '#ef4444',
     
     // Text colors
     text: '#1e252b',
-    textSecondary: '#5e6a73',
-    textTertiary: '#8b95a1',
+    textSecondary: '#4b5563',
+    textTertiary: '#6b7280',
     textInverse: '#ffffff',
     
     // Icon colors
-    icon: '#5e6a73',
-    iconSecondary: '#8b95a1',
+    icon: '#4b5563',
+    iconSecondary: '#6b7280',
     
     // Border colors
-    border: '#c5cdd6',
-    borderLight: '#d4dce5',
+    border: '#c7dacd',
+    borderLight: '#dbe9df',
+    outline: '#aac7b1',
+    scrim: 'rgba(17, 24, 39, 0.42)',
     
     // Status colors
-    info: '#3b82f6',
-    infoBg: '#dbeafe',
-    successBg: '#d1fae5',
+    info: '#0f766e',
+    infoBg: '#d8f2ed',
+    successBg: '#d7f4e1',
     warningBg: '#fef3c7',
     errorBg: '#fee2e2',
   },
@@ -48,7 +53,7 @@ const lightTheme = {
   shadows: {
     // Neomorphism shadows - light source from top-left
     pressed: {
-      shadowColor: '#a3b1c6',
+      shadowColor: '#93b6a0',
       shadowOffset: { width: 4, height: 4 },
       shadowOpacity: 0.5,
       shadowRadius: 8,
@@ -65,7 +70,7 @@ const lightTheme = {
       },
       // Bottom-right dark shadow
       dark: {
-        shadowColor: '#a3b1c6',
+        shadowColor: '#9bb9a5',
         shadowOffset: { width: 6, height: 6 },
         shadowOpacity: 0.5,
         shadowRadius: 12,
@@ -79,14 +84,14 @@ const lightTheme = {
         shadowRadius: 8,
       },
       dark: {
-        shadowColor: '#a3b1c6',
+        shadowColor: '#a4c0ad',
         shadowOffset: { width: 4, height: 4 },
         shadowOpacity: 0.4,
         shadowRadius: 8,
       },
     },
     floating: {
-      shadowColor: '#a3b1c6',
+      shadowColor: '#8dad99',
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.3,
       shadowRadius: 16,
@@ -160,17 +165,20 @@ const darkTheme = {
   
   colors: {
     // Background colors
-    background: '#1a1f2e',
-    surface: '#1a1f2e',
-    surfaceElevated: '#232936',
+    background: '#08130d',
+    surface: '#0f1c15',
+    surfaceElevated: '#15251d',
+    surfaceContainer: '#193026',
+    surfaceContainerHigh: '#1f3a2f',
+    surfaceContainerHighest: '#284839',
     
     // Primary colors
-    primary: '#7c9aff',
-    primaryDark: '#5e81f4',
-    primaryLight: '#9db3ff',
+    primary: '#6ee7a1',
+    primaryDark: '#4fd18a',
+    primaryLight: '#a7f3c5',
     
     // Accent colors
-    accent: '#a78bfa',
+    accent: '#2dd4bf',
     success: '#34d399',
     warning: '#fbbf24',
     error: '#f87171',
@@ -186,13 +194,15 @@ const darkTheme = {
     iconSecondary: '#94a3b8',
     
     // Border colors
-    border: '#2d3748',
-    borderLight: '#374151',
+    border: '#264234',
+    borderLight: '#335545',
+    outline: '#5f8b76',
+    scrim: 'rgba(2, 6, 23, 0.62)',
     
     // Status colors
-    info: '#60a5fa',
-    infoBg: '#1e3a5f',
-    successBg: '#1a3d2e',
+    info: '#5eead4',
+    infoBg: '#12352d',
+    successBg: '#173e28',
     warningBg: '#3d2e1a',
     errorBg: '#3d1a1a',
   },
@@ -208,7 +218,7 @@ const darkTheme = {
     },
     raised: {
       light: {
-        shadowColor: '#2d3748',
+        shadowColor: '#294238',
         shadowOffset: { width: -6, height: -6 },
         shadowOpacity: 0.5,
         shadowRadius: 12,
@@ -222,7 +232,7 @@ const darkTheme = {
     },
     raisedSoft: {
       light: {
-        shadowColor: '#2d3748',
+        shadowColor: '#2c483d',
         shadowOffset: { width: -4, height: -4 },
         shadowOpacity: 0.4,
         shadowRadius: 8,

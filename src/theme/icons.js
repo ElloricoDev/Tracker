@@ -1,0 +1,41 @@
+const iconNames = {
+  dashboard: 'grid-outline',
+  entries: 'receipt-outline',
+  settings: 'settings-outline',
+  backup: 'cloud-upload-outline',
+  progress: 'stats-chart-outline',
+  date: 'calendar-outline',
+  time: 'time-outline',
+  morning: 'sunny-outline',
+  afternoon: 'partly-sunny-outline',
+  edit: 'create-outline',
+  delete: 'trash-outline',
+  save: 'checkmark-circle-outline',
+  next: 'chevron-forward',
+  previous: 'chevron-back',
+  info: 'information-circle-outline',
+  warning: 'warning-outline',
+  success: 'checkmark-circle-outline',
+  empty: 'document-text-outline',
+  quickAction: 'flash-outline',
+  summary: 'sparkles-outline',
+  activity: 'pulse-outline',
+  themeLight: 'sunny-outline',
+  themeDark: 'moon-outline',
+  export: 'download-outline',
+  restore: 'refresh-outline',
+};
+
+const iconSizes = {
+  navigation: 22,
+  section: 18,
+  action: 18,
+  inline: 16,
+  empty: 42,
+  hero: 28,
+};
+
+module.exports = {
+  iconNames,
+  iconSizes,
+};

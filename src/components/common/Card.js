@@ -1,6 +1,6 @@
 /**
- * Neomorphism Card Component
- * Reusable card with neomorphism shadows and elevation
+ * Card Component
+ * Reusable material-style card with elevation.
  */
 
 const React = require('react');
@@ -9,7 +9,7 @@ const { useTheme } = require('../../hooks/useTheme');
 const { getElevationStyle, designTokens } = require('../../theme/tokens');
 
 /**
- * Card component with neomorphism styling
+ * Card component with reusable material styling
  * @param {object} props
  * @param {ReactNode} props.children - Card content
  * @param {string} props.elevation - 'flat', 'low', 'medium', 'high', or 'floating'
@@ -19,38 +19,43 @@ const { getElevationStyle, designTokens } = require('../../theme/tokens');
 function Card({
   children,
   elevation = 'medium',
+  variant = 'default',
   style,
   contentStyle,
 }) {
   const { theme, isDarkMode } = useTheme();
-  
+
   const cardStyles = React.useMemo(() => {
+    const variantStyles = {
+      default: {
+        backgroundColor: theme.colors.surfaceContainer || theme.colors.surfaceElevated,
+        borderColor: theme.colors.borderLight || theme.colors.border,
+      },
+      section: {
+        backgroundColor: theme.colors.surfaceElevated,
+        borderColor: theme.colors.outline || theme.colors.border,
+      },
+    };
+
     return [
       styles.card,
-      {
-        backgroundColor: theme.colors.surface,
-      },
+      variantStyles[variant] || variantStyles.default,
       getElevationStyle(elevation, isDarkMode),
       style,
     ];
-  }, [theme, isDarkMode, elevation, style]);
-  
+  }, [theme, isDarkMode, elevation, style, variant]);
+
   return (
     <View style={cardStyles}>
-      {contentStyle ? (
-        <View style={contentStyle}>
-          {children}
-        </View>
-      ) : (
-        children
-      )}
+      {contentStyle ? <View style={contentStyle}>{children}</View> : children}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: designTokens.layout.cardPadding,
+    borderRadius: designTokens.borderRadius.lg,
+    borderWidth: 1,
     padding: designTokens.layout.cardPadding,
   },
 });

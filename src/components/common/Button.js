@@ -1,6 +1,6 @@
 /**
- * Neomorphism Button Component
- * Reusable button with neomorphism styling and multiple variants
+ * Button Component
+ * Reusable button with material styling and multiple variants.
  */
 
 const React = require('react');
@@ -10,7 +10,7 @@ const { useNeomorphismPress } = require('../../hooks/useNeomorphismAnimation');
 const { getElevationStyle, designTokens } = require('../../theme/tokens');
 
 /**
- * Button component with neomorphism styling
+ * Button component with reusable material styling
  * @param {object} props
  * @param {function} props.onPress - Press handler
  * @param {string} props.variant - 'primary', 'secondary', 'danger', 'success', or 'flat'
@@ -36,7 +36,7 @@ function Button({
   accessibilityLabel,
 }) {
   const { theme, isDarkMode } = useTheme();
-  const { animatedValue, handlePressIn, handlePressOut, animatedStyle } = useNeomorphismPress();
+  const { handlePressIn, handlePressOut, animatedStyle } = useNeomorphismPress();
   
   const isDisabled = disabled || loading;
   
@@ -44,6 +44,7 @@ function Button({
     const baseStyle = {
       ...styles.button,
       ...getElevationStyle('medium', isDarkMode),
+      borderWidth: 1,
     };
     
     const sizeStyles = {
@@ -55,21 +56,27 @@ function Button({
     const variantStyles = {
       primary: {
         backgroundColor: theme.colors.primary,
+        borderColor: theme.colors.primaryLight,
       },
       secondary: {
-        backgroundColor: theme.colors.surface,
+        backgroundColor: theme.colors.surfaceContainerHighest || theme.colors.surfaceContainerHigh || theme.colors.surface,
+        borderColor: theme.colors.outline || theme.colors.border,
       },
       danger: {
         backgroundColor: theme.colors.error,
+        borderColor: theme.colors.error,
       },
       success: {
         backgroundColor: theme.colors.success,
+        borderColor: theme.colors.success,
       },
       accent: {
         backgroundColor: theme.colors.accent,
+        borderColor: theme.colors.accent,
       },
       flat: {
-        backgroundColor: theme.colors.surface,
+        backgroundColor: theme.name === 'dark' ? 'rgba(110, 231, 161, 0.10)' : 'rgba(31, 138, 77, 0.08)',
+        borderColor: theme.name === 'dark' ? 'rgba(110, 231, 161, 0.18)' : 'rgba(31, 138, 77, 0.12)',
         shadowOpacity: 0,
         elevation: 0,
       },
@@ -79,11 +86,26 @@ function Button({
       baseStyle,
       sizeStyles[size],
       variantStyles[variant],
-      isDisabled && { ...styles.disabled, backgroundColor: theme.colors.border },
-      style,
+      isDisabled && { ...styles.disabled, backgroundColor: theme.colors.surfaceContainer || theme.colors.border },
     ];
-  }, [theme, isDarkMode, variant, size, isDisabled, style]);
+  }, [theme, isDarkMode, variant, size, isDisabled]);
   
+  const contentColor = React.useMemo(() => {
+    if (isDisabled) {
+      return theme.colors.textSecondary;
+    }
+
+    if (variant === 'secondary') {
+      return theme.colors.text;
+    }
+
+    if (variant === 'flat') {
+      return theme.colors.primary;
+    }
+
+    return theme.colors.textInverse;
+  }, [theme, variant, isDisabled]);
+
   const textStyles = React.useMemo(() => {
     const sizeStyles = {
       small: styles.textSmall,
@@ -91,44 +113,46 @@ function Button({
       large: styles.textLarge,
     };
     
-    const variantTextColor = {
-      primary: theme.colors.textInverse,
-      secondary: theme.colors.text,
-      danger: theme.colors.textInverse,
-      success: theme.colors.textInverse,
-      accent: theme.colors.textInverse,
-      flat: theme.colors.text,
-    };
-    
     return [
       styles.text,
       sizeStyles[size],
-      { color: variantTextColor[variant] },
-      isDisabled && styles.textDisabled,
+      { color: contentColor },
     ];
-  }, [theme, variant, size, isDisabled]);
+  }, [size, contentColor]);
+
+  const renderIcon = React.useCallback((iconElement) => {
+    if (!iconElement) {
+      return null;
+    }
+
+    if (!React.isValidElement(iconElement)) {
+      return iconElement;
+    }
+
+    return React.cloneElement(iconElement, { color: contentColor });
+  }, [contentColor]);
   
   const content = (
     <View style={styles.content}>
       {loading && (
         <ActivityIndicator
           size="small"
-          color={variant === 'secondary' || variant === 'flat' ? theme.colors.primary : theme.colors.textInverse}
+          color={contentColor}
           style={styles.loader}
         />
       )}
-      {!loading && icon && iconPosition === 'left' && <View style={styles.iconLeft}>{icon}</View>}
+      {!loading && icon && iconPosition === 'left' && <View style={styles.iconLeft}>{renderIcon(icon)}</View>}
       {typeof children === 'string' ? (
         <Text style={textStyles}>{children}</Text>
       ) : (
         children
       )}
-      {!loading && icon && iconPosition === 'right' && <View style={styles.iconRight}>{icon}</View>}
+      {!loading && icon && iconPosition === 'right' && <View style={styles.iconRight}>{renderIcon(icon)}</View>}
     </View>
   );
   
   return (
-    <Animated.View style={[animatedStyle]}>
+    <Animated.View style={[animatedStyle, style]}>
       <Pressable
         style={buttonStyles}
         onPress={onPress}
@@ -147,30 +171,31 @@ function Button({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: designTokens.layout.cardPadding,
+    borderRadius: designTokens.borderRadius.lg,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
   },
   buttonSmall: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 8,
-    minHeight: 32,
+    minHeight: designTokens.sizes.touchTarget,
   },
   buttonMedium: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     paddingVertical: 12,
-    minHeight: 44,
+    minHeight: designTokens.sizes.button,
   },
   buttonLarge: {
     paddingHorizontal: 24,
-    paddingVertical: 16,
-    minHeight: 52,
+    paddingVertical: 14,
+    minHeight: 54,
   },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    minWidth: 0,
   },
   text: {
     fontWeight: '700',
@@ -186,10 +211,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
   disabled: {
-    opacity: designTokens.opacity.disabled,
-  },
-  textDisabled: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
   loader: {
     marginRight: 8,

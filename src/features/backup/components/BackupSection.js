@@ -4,12 +4,14 @@
  */
 
 const React = require('react');
-const { View, Text, StyleSheet } = require('react-native');
+const { Text, StyleSheet } = require('react-native');
 const { useTheme } = require('../../../hooks/useTheme');
 const { designTokens } = require('../../../theme/tokens');
-const Card = require('../../../components/common/Card');
+const ActionRow = require('../../../components/common/ActionRow');
 const Button = require('../../../components/common/Button');
-const { Ionicons } = require('@expo/vector-icons');
+const SectionCard = require('../../../components/common/SectionCard');
+const StatusBanner = require('../../../components/common/StatusBanner');
+const AppIcon = require('../../../components/common/AppIcon');
 
 /**
  * BackupSection component
@@ -28,12 +30,7 @@ function BackupSection({
   restoring,
 }) {
   const { theme } = useTheme();
-  
-  const titleStyles = React.useMemo(() => ({
-    color: theme.colors.text,
-    ...styles.title,
-  }), [theme]);
-  
+
   const descStyles = React.useMemo(() => ({
     color: theme.colors.textSecondary,
     ...styles.desc,
@@ -45,11 +42,11 @@ function BackupSection({
   }), [theme]);
   
   return (
-    <Card elevation="medium">
-      <View style={styles.header}>
-        <Ionicons name="cloud-upload-outline" size={18} color={theme.colors.icon} />
-        <Text style={titleStyles}>Backup & Restore</Text>
-      </View>
+    <SectionCard
+      title="Backup & Restore"
+      subtitle="Protect your local data before device changes or recovery work."
+      icon="backup"
+    >
       
       <Text style={descStyles}>
         Export your data to a backup file or restore from a previous backup.
@@ -60,14 +57,21 @@ function BackupSection({
           Last backup: {new Date(lastBackupAt).toLocaleString()}
         </Text>
       )}
+
+      {!lastBackupAt && (
+        <StatusBanner
+          tone="warning"
+          message="No backup has been created yet. Export one now so you have a restore point."
+        />
+      )}
       
-      <View style={styles.actions}>
+      <ActionRow stacked style={styles.actions}>
         <Button
           variant="primary"
           onPress={onExport}
           loading={exporting}
           disabled={exporting || restoring}
-          icon={<Ionicons name="download-outline" size={16} color="#ffffff" />}
+          icon={<AppIcon name="export" size="inline" color="#ffffff" />}
           style={styles.button}
         >
           Export Backup
@@ -77,27 +81,17 @@ function BackupSection({
           onPress={onRestore}
           loading={restoring}
           disabled={exporting || restoring || !lastBackupAt}
-          icon={<Ionicons name="refresh-outline" size={16} color="#ffffff" />}
+          icon={<AppIcon name="restore" size="inline" color="#ffffff" />}
           style={styles.button}
         >
           Restore Backup
         </Button>
-      </View>
-    </Card>
+      </ActionRow>
+    </SectionCard>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: designTokens.spacing.sm,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
   desc: {
     fontSize: 14,
     lineHeight: 20,
@@ -108,11 +102,11 @@ const styles = StyleSheet.create({
     marginBottom: designTokens.spacing.md,
   },
   actions: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: designTokens.spacing.md,
   },
   button: {
-    flex: 1,
+    width: '100%',
   },
 });
 

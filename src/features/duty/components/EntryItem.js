@@ -9,7 +9,7 @@ const { useTheme } = require('../../../hooks/useTheme');
 const { designTokens } = require('../../../theme/tokens');
 const Card = require('../../../components/common/Card');
 const Button = require('../../../components/common/Button');
-const { Ionicons } = require('@expo/vector-icons');
+const AppIcon = require('../../../components/common/AppIcon');
 
 /**
  * EntryItem component
@@ -69,19 +69,19 @@ const EntryItem = React.memo(function EntryItem({
       
       <View style={styles.actions}>
         <Button
-          variant="flat"
+          variant="primary"
           size="small"
           onPress={() => onEdit(entry)}
-          icon={<Ionicons name="create-outline" size={16} color={theme.colors.primary} />}
+          icon={<AppIcon name="edit" size="inline" color="#ffffff" />}
           style={styles.actionButton}
         >
           Edit
         </Button>
         <Button
-          variant="flat"
+          variant="danger"
           size="small"
           onPress={() => onDelete(entry)}
-          icon={<Ionicons name="trash-outline" size={16} color={theme.colors.error} />}
+          icon={<AppIcon name="delete" size="inline" color="#ffffff" />}
           style={styles.actionButton}
         >
           Delete
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: designTokens.spacing.sm,
-    marginTop: designTokens.spacing.xs,
+    marginTop: designTokens.spacing.sm,
   },
   actionButton: {
     flex: 1,

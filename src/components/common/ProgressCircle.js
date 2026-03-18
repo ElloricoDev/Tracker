@@ -54,7 +54,7 @@ function ProgressCircle({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={theme.colors.border}
+          stroke={theme.colors.surfaceContainerHighest || theme.colors.border}
           strokeWidth={strokeWidth}
           fill="none"
         />

@@ -1,15 +1,15 @@
 /**
- * Neomorphism Input Component
- * Reusable text input with neomorphism inset styling
+ * Input Component
+ * Reusable text input with material styling.
  */
 
 const React = require('react');
 const { TextInput, View, Text, StyleSheet } = require('react-native');
 const { useTheme } = require('../../hooks/useTheme');
-const { designTokens } = require('../../theme/tokens');
+const { designTokens, getElevationStyle } = require('../../theme/tokens');
 
 /**
- * Input component with neomorphism inset styling
+ * Input component with reusable material styling
  * @param {object} props
  * @param {string} props.value - Input value
  * @param {function} props.onChangeText - Change handler
@@ -47,15 +47,16 @@ function Input({
     return [
       styles.inputContainer,
       {
-        backgroundColor: theme.colors.surface,
+        backgroundColor: theme.colors.surfaceElevated,
         borderColor: isFocused ? theme.colors.primary : theme.colors.border,
       },
+      getElevationStyle(isFocused ? 'medium' : 'low', isDarkMode),
       error && {
         borderColor: theme.colors.error,
       },
       disabled && styles.disabled,
     ];
-  }, [theme, isFocused, error, disabled]);
+  }, [theme, isFocused, error, disabled, isDarkMode]);
   
   const inputStyles = React.useMemo(() => {
     return [
@@ -118,19 +119,13 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     borderRadius: designTokens.borderRadius.md,
-    borderWidth: 2,
-    // Inset shadow effect (simulated with border)
-    shadowColor: '#a3b1c6',
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: -1, // Negative elevation for inset effect on Android
+    borderWidth: 1.5,
   },
   input: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    minHeight: 48,
+    minHeight: designTokens.sizes.input,
   },
   disabled: {
     opacity: designTokens.opacity.disabled,

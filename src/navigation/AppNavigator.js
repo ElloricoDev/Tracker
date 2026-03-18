@@ -1,189 +1,188 @@
 /**
- * App Navigator with Drawer
- * Configures drawer navigation with neomorphism styling
+ * App Navigator
+ * Premium tab-led shell with shared app state.
  */
 
 const React = require('react');
-const { View, Text, StyleSheet, TouchableOpacity } = require('react-native');
-const { createDrawerNavigator } = require('@react-navigation/drawer');
+const { StyleSheet } = require('react-native');
+const { createBottomTabNavigator } = require('@react-navigation/bottom-tabs');
 const { NavigationContainer } = require('@react-navigation/native');
-const { Ionicons } = require('@expo/vector-icons');
+const { createNativeStackNavigator } = require('@react-navigation/native-stack');
+const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { useTheme } = require('../hooks/useTheme');
+const { useToast } = require('../hooks/useToast');
 const { designTokens } = require('../theme/tokens');
+const AppIcon = require('../components/common/AppIcon');
+const Toast = require('../components/common/Toast');
 const HomeScreen = require('../features/duty/screens/HomeScreen');
 const LogsScreen = require('../features/duty/screens/LogsScreen');
 const SettingsScreen = require('../features/settings/screens/SettingsScreen');
-const BackupScreen = require('../features/backup/screens/BackupScreen');
-const Toast = require('../components/common/Toast');
-const { useToast } = require('../hooks/useToast');
+const { dateKeyFromDate } = require('../features/duty/service');
 
-const Drawer = createDrawerNavigator();
+const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
-/**
- * Custom Drawer Content with Neomorphism Design
- */
-function CustomDrawerContent({ navigation, state }) {
-  const { theme, isDarkMode, toggleTheme } = useTheme();
+function createNavigationTheme(theme) {
+  return {
+    dark: theme.name === 'dark',
+    colors: {
+      primary: theme.colors.primary,
+      background: theme.colors.background,
+      card: theme.colors.surface,
+      text: theme.colors.text,
+      border: theme.colors.borderLight || theme.colors.border,
+      notification: theme.colors.accent,
+    },
+    fonts: {
+      regular: {
+        fontFamily: 'System',
+        fontWeight: '400',
+      },
+      medium: {
+        fontFamily: 'System',
+        fontWeight: '500',
+      },
+      bold: {
+        fontFamily: 'System',
+        fontWeight: '700',
+      },
+      heavy: {
+        fontFamily: 'System',
+        fontWeight: '800',
+      },
+    },
+  };
+}
 
-  const routes = [
-    { name: 'Home', label: 'Home', icon: 'home-outline' },
-    { name: 'Logs', label: 'Duty Logs', icon: 'list-outline' },
-    { name: 'Settings', label: 'Settings', icon: 'settings-outline' },
-    { name: 'Backup', label: 'Backup & Restore', icon: 'cloud-upload-outline' },
-  ];
+function AppTabs({
+  dutyService,
+  settingsRepository,
+  backupService,
+  sharedState,
+  onRefresh,
+}) {
+  const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
+  const bottomInset = Math.max(insets.bottom, designTokens.spacing.sm);
 
   return (
-    <View style={[styles.drawerContainer, { backgroundColor: theme.colors.background }]}>
-      {/* Header */}
-      <View style={[styles.drawerHeader, theme.elevations.medium, { backgroundColor: theme.colors.surface }]}>
-        <Ionicons name="time-outline" size={32} color={theme.colors.primary} />
-        <Text style={[styles.drawerTitle, { color: theme.colors.text }]}>
-          OJT Tracker
-        </Text>
-        <Text style={[styles.drawerSubtitle, { color: theme.colors.textSecondary }]}>
-          Duty Hours Management
-        </Text>
-      </View>
-
-      {/* Navigation Items */}
-      <View style={styles.drawerItems}>
-        {routes.map((route, index) => {
-          const isFocused = state.index === index;
-          const onPress = () => {
-            navigation.navigate(route.name);
-          };
-
-          return (
-            <TouchableOpacity
-              key={route.name}
-              onPress={onPress}
-              activeOpacity={0.7}
-              style={[
-                styles.drawerItem,
-                isFocused ? [theme.elevations.pressed, { backgroundColor: theme.colors.surface }] : theme.elevations.low,
-                { backgroundColor: isFocused ? theme.colors.primaryLight : theme.colors.surface },
-              ]}
-            >
-              <Ionicons
-                name={route.icon}
-                size={24}
-                color={isFocused ? theme.colors.primary : theme.colors.textSecondary}
-              />
-              <Text
-                style={[
-                  styles.drawerItemText,
-                  { color: isFocused ? theme.colors.primary : theme.colors.text },
-                  isFocused && styles.drawerItemTextActive,
-                ]}
-              >
-                {route.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      {/* Theme Toggle */}
-      <View style={styles.drawerFooter}>
-        <TouchableOpacity
-          onPress={toggleTheme}
-          activeOpacity={0.7}
-          style={[styles.themeToggle, theme.elevations.low, { backgroundColor: theme.colors.surface }]}
-        >
-          <Ionicons
-            name={isDarkMode ? 'sunny-outline' : 'moon-outline'}
-            size={24}
-            color={theme.colors.primary}
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.textSecondary,
+        tabBarLabelStyle: styles.tabLabel,
+        tabBarStyle: {
+          height: designTokens.sizes.tabBarHeight + bottomInset,
+          paddingTop: designTokens.spacing.xs,
+          paddingBottom: bottomInset,
+          borderTopWidth: 1,
+          borderTopColor: theme.colors.borderLight || theme.colors.border,
+          backgroundColor: theme.colors.surfaceElevated || theme.colors.surface,
+          shadowColor: theme.colors.primary,
+          shadowOffset: { width: 0, height: -6 },
+          shadowOpacity: theme.name === 'dark' ? 0.18 : 0.08,
+          shadowRadius: 18,
+          elevation: 12,
+        },
+        sceneStyle: {
+          backgroundColor: theme.colors.background,
+        },
+        tabBarIcon: ({ color }) => (
+          <AppIcon name={route.name.toLowerCase()} size="navigation" color={color} />
+        ),
+      })}
+    >
+      <Tab.Screen name="Dashboard">
+        {(props) => (
+          <HomeScreen
+            {...props}
+            totalDurationMs={sharedState.totalDurationMs}
+            requiredHours={sharedState.requiredHours}
+            recentEntries={sharedState.recentEntries}
+            todayEntry={sharedState.todayEntry}
+            onRefresh={onRefresh}
           />
-          <Text style={[styles.themeToggleText, { color: theme.colors.text }]}>
-            {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+        )}
+      </Tab.Screen>
+      <Tab.Screen name="Entries">
+        {(props) => (
+          <LogsScreen
+            {...props}
+            dutyService={dutyService}
+            onRefresh={onRefresh}
+          />
+        )}
+      </Tab.Screen>
+      <Tab.Screen name="Settings">
+        {(props) => (
+          <SettingsScreen
+            {...props}
+            settingsRepository={settingsRepository}
+            backupService={backupService}
+            requiredHours={sharedState.requiredHours}
+            lastBackupAt={sharedState.lastBackupAt}
+            onRefresh={onRefresh}
+          />
+        )}
+      </Tab.Screen>
+    </Tab.Navigator>
   );
 }
 
-/**
- * AppNavigator component
- * @param {object} props
- * @param {object} props.dutyService - Duty service instance
- * @param {object} props.settingsRepository - Settings repository
- * @param {object} props.backupService - Backup service instance
- */
 function AppNavigator({ dutyService, settingsRepository, backupService }) {
   const { theme } = useTheme();
   const { toastMessage, toastType, toastVisible } = useToast();
 
-  // Shared state
-  const [totalDurationMs, setTotalDurationMs] = React.useState(0);
-  const [requiredHours, setRequiredHours] = React.useState(0);
-  const [lastBackupAt, setLastBackupAt] = React.useState('');
+  const [sharedState, setSharedState] = React.useState({
+    totalDurationMs: 0,
+    requiredHours: 0,
+    lastBackupAt: '',
+    recentEntries: [],
+    todayEntry: null,
+  });
 
   const handleRefresh = React.useCallback(async () => {
-    const [totalMs, targetHours, latestBackupAt] = await Promise.all([
+    const todayKey = dateKeyFromDate(new Date());
+    const [totalMs, targetHours, latestBackupAt, recentEntries, todayEntry] = await Promise.all([
       dutyService.getTotalDurationMs(),
       settingsRepository.getRequiredHours(),
       settingsRepository.getSetting('last_backup_at'),
+      dutyService.repository.listRecentEntries(3, 0),
+      dutyService.repository.getEntryByDate(todayKey),
     ]);
-    
-    setTotalDurationMs(totalMs);
-    setRequiredHours(targetHours);
-    setLastBackupAt(latestBackupAt || '');
+
+    setSharedState({
+      totalDurationMs: totalMs,
+      requiredHours: targetHours,
+      lastBackupAt: latestBackupAt || '',
+      recentEntries,
+      todayEntry,
+    });
   }, [dutyService, settingsRepository]);
 
   React.useEffect(() => {
     handleRefresh();
   }, [handleRefresh]);
 
-  const screenParams = {
-    dutyService,
-    settingsRepository,
-    backupService,
-    totalDurationMs,
-    requiredHours,
-    lastBackupAt,
-    onRefresh: handleRefresh,
-  };
-
   return (
     <>
-      <NavigationContainer>
-        <Drawer.Navigator
-          drawerContent={(props) => <CustomDrawerContent {...props} />}
-          screenOptions={{
-            headerShown: false,
-            drawerType: 'front',
-            drawerStyle: {
-              backgroundColor: theme.colors.background,
-              width: 280,
-            },
-            overlayColor: 'rgba(0,0,0,0.4)',
-          }}
-        >
-          <Drawer.Screen
-            name="Home"
-            component={HomeScreen}
-            initialParams={screenParams}
-          />
-          <Drawer.Screen
-            name="Logs"
-            component={LogsScreen}
-            initialParams={screenParams}
-          />
-          <Drawer.Screen
-            name="Settings"
-            component={SettingsScreen}
-            initialParams={screenParams}
-          />
-          <Drawer.Screen
-            name="Backup"
-            component={BackupScreen}
-            initialParams={screenParams}
-          />
-        </Drawer.Navigator>
+      <NavigationContainer theme={createNavigationTheme(theme)}>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="MainTabs">
+            {() => (
+              <AppTabs
+                dutyService={dutyService}
+                settingsRepository={settingsRepository}
+                backupService={backupService}
+                sharedState={sharedState}
+                onRefresh={handleRefresh}
+              />
+            )}
+          </Stack.Screen>
+        </Stack.Navigator>
       </NavigationContainer>
-      
+
       <Toast
         message={toastMessage}
         type={toastType}
@@ -194,57 +193,9 @@ function AppNavigator({ dutyService, settingsRepository, backupService }) {
 }
 
 const styles = StyleSheet.create({
-  drawerContainer: {
-    flex: 1,
-    paddingTop: designTokens.spacing.xl,
-  },
-  drawerHeader: {
-    padding: designTokens.spacing.xl,
-    marginHorizontal: designTokens.spacing.md,
-    marginBottom: designTokens.spacing.lg,
-    borderRadius: designTokens.borderRadius.lg,
-    alignItems: 'center',
-  },
-  drawerTitle: {
-    fontSize: 24,
+  tabLabel: {
+    fontSize: 12,
     fontWeight: '700',
-    marginTop: designTokens.spacing.sm,
-  },
-  drawerSubtitle: {
-    fontSize: 14,
-    marginTop: designTokens.spacing.xs,
-  },
-  drawerItems: {
-    flex: 1,
-    paddingHorizontal: designTokens.spacing.md,
-  },
-  drawerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: designTokens.spacing.md,
-    marginBottom: designTokens.spacing.sm,
-    borderRadius: designTokens.borderRadius.md,
-  },
-  drawerItemText: {
-    fontSize: 16,
-    marginLeft: designTokens.spacing.md,
-  },
-  drawerItemTextActive: {
-    fontWeight: '600',
-  },
-  drawerFooter: {
-    paddingHorizontal: designTokens.spacing.md,
-    paddingBottom: designTokens.spacing.xl,
-  },
-  themeToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: designTokens.spacing.md,
-    borderRadius: designTokens.borderRadius.md,
-  },
-  themeToggleText: {
-    fontSize: 16,
-    marginLeft: designTokens.spacing.md,
   },
 });
 

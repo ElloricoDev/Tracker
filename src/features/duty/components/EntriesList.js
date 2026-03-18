@@ -4,13 +4,14 @@
  */
 
 const React = require('react');
-const { View, Text, StyleSheet, ScrollView } = require('react-native');
+const { View, Text, StyleSheet } = require('react-native');
 const { useTheme } = require('../../../hooks/useTheme');
 const { designTokens } = require('../../../theme/tokens');
-const Card = require('../../../components/common/Card');
 const Button = require('../../../components/common/Button');
+const SectionCard = require('../../../components/common/SectionCard');
+const EmptyState = require('../../../components/common/EmptyState');
+const AppIcon = require('../../../components/common/AppIcon');
 const EntryItem = require('./EntryItem');
-const { Ionicons } = require('@expo/vector-icons');
 
 /**
  * EntriesList component
@@ -35,22 +36,7 @@ function EntriesList({
   formatTime,
 }) {
   const { theme } = useTheme();
-  
-  const titleStyles = React.useMemo(() => ({
-    color: theme.colors.text,
-    ...styles.title,
-  }), [theme]);
-  
-  const emptyTitleStyles = React.useMemo(() => ({
-    color: theme.colors.text,
-    ...styles.emptyTitle,
-  }), [theme]);
-  
-  const emptyTextStyles = React.useMemo(() => ({
-    color: theme.colors.textSecondary,
-    ...styles.emptyText,
-  }), [theme]);
-  
+
   const pageInfoStyles = React.useMemo(() => ({
     color: theme.colors.textSecondary,
     ...styles.pageInfo,
@@ -60,20 +46,16 @@ function EntriesList({
   const canGoNext = currentPage < totalPages - 1;
   
   return (
-    <Card elevation="medium">
-      <View style={styles.header}>
-        <Ionicons name="list-outline" size={18} color={theme.colors.icon} />
-        <Text style={titleStyles}>Recent Entries</Text>
-      </View>
-      
+    <SectionCard
+      title="Entry History"
+      subtitle="Review recent duty records, then edit or delete them when needed."
+      icon="entries"
+    >
       {entries.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Ionicons name="document-outline" size={48} color={theme.colors.iconSecondary} />
-          <Text style={emptyTitleStyles}>No entries yet</Text>
-          <Text style={emptyTextStyles}>
-            Save your first daily log above. Your recent entries will appear here.
-          </Text>
-        </View>
+        <EmptyState
+          title="No entries yet"
+          message="Save your first duty record above. Your history will start appearing here right away."
+        />
       ) : (
         <>
           <View style={styles.list}>
@@ -96,7 +78,8 @@ function EntriesList({
                 size="small"
                 onPress={() => onPageChange(currentPage - 1)}
                 disabled={!canGoPrevious}
-                icon={<Ionicons name="chevron-back" size={16} color={theme.colors.text} />}
+                icon={<AppIcon name="previous" size="inline" color={theme.colors.text} />}
+                style={styles.pageButton}
               >
                 Previous
               </Button>
@@ -108,8 +91,9 @@ function EntriesList({
                 size="small"
                 onPress={() => onPageChange(currentPage + 1)}
                 disabled={!canGoNext}
-                icon={<Ionicons name="chevron-forward" size={16} color={theme.colors.text} />}
+                icon={<AppIcon name="next" size="inline" color={theme.colors.text} />}
                 iconPosition="right"
+                style={styles.pageButton}
               >
                 Next
               </Button>
@@ -117,35 +101,11 @@ function EntriesList({
           )}
         </>
       )}
-    </Card>
+    </SectionCard>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: designTokens.spacing.sm,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: designTokens.spacing.xxl,
-    gap: designTokens.spacing.md,
-  },
-  emptyTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  emptyText: {
-    fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
   list: {
     gap: designTokens.spacing.md,
   },
@@ -156,9 +116,14 @@ const styles = StyleSheet.create({
     marginTop: designTokens.spacing.md,
     gap: designTokens.spacing.sm,
   },
+  pageButton: {
+    flex: 1,
+  },
   pageInfo: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
+    minWidth: 96,
+    textAlign: 'center',
   },
 });
 

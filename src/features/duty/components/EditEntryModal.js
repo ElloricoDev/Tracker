@@ -4,7 +4,7 @@
  */
 
 const React = require('react');
-const { View, Text, StyleSheet } = require('react-native');
+const { View, Text, StyleSheet, ScrollView } = require('react-native');
 const { useTheme } = require('../../../hooks/useTheme');
 const { designTokens } = require('../../../theme/tokens');
 const NeoModal = require('../../../components/common/Modal');
@@ -73,75 +73,97 @@ function EditEntryModal({
     color: theme.colors.error,
     ...styles.error,
   }), [theme]);
+
+  const actionsStyles = React.useMemo(() => ([
+    styles.actions,
+    { borderTopColor: theme.colors.borderLight || theme.colors.border },
+  ]), [theme]);
   
   return (
     <NeoModal visible={visible} onClose={onClose}>
-      <View style={styles.header}>
-        <Ionicons name="create-outline" size={20} color={theme.colors.primary} />
-        <Text style={titleStyles}>Edit Entry</Text>
-      </View>
-      
-      <Text style={hintStyles}>Update this log and tap Save changes.</Text>
-      
-      <View style={dateChipStyles}>
-        <Text style={dateChipTextStyles}>
-          Editing {selectedDate?.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-        </Text>
-      </View>
-      
-      <View style={styles.formField}>
-        <Text style={labelStyles}>Date</Text>
-        <DatePickerButton
-          value={selectedDate}
-          onChange={onDateChange}
-        />
-      </View>
-      
-      <SessionTimeFields
-        values={sessionValues}
-        onTimeChange={onTimeChange}
-        onClearAm={onClearAm}
-        onClearPm={onClearPm}
-      />
-      
-      {errors.length > 0 && (
-        <View style={styles.errors}>
-          {errors.map((error, index) => (
-            <Text key={index} style={errorStyles}>• {error}</Text>
-          ))}
+      <View style={styles.container}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.header}>
+            <Ionicons name="create-outline" size={20} color={theme.colors.primary} />
+            <Text style={titleStyles}>Edit Entry</Text>
+          </View>
+          
+          <Text style={hintStyles}>Update this log and tap Save changes.</Text>
+          
+          <View style={dateChipStyles}>
+            <Text style={dateChipTextStyles}>
+              Editing {selectedDate?.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            </Text>
+          </View>
+          
+          <View style={styles.formField}>
+            <Text style={labelStyles}>Date</Text>
+            <DatePickerButton
+              value={selectedDate}
+              onChange={onDateChange}
+            />
+          </View>
+          
+          <SessionTimeFields
+            values={sessionValues}
+            onTimeChange={onTimeChange}
+            onClearAm={onClearAm}
+            onClearPm={onClearPm}
+          />
+          
+          {errors.length > 0 && (
+            <View style={styles.errors}>
+              {errors.map((error, index) => (
+                <Text key={index} style={errorStyles}>• {error}</Text>
+              ))}
+            </View>
+          )}
+        </ScrollView>
+
+        <View style={actionsStyles}>
+          <Button
+            variant="secondary"
+            onPress={onClose}
+            disabled={saving}
+            style={styles.button}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onPress={onSave}
+            loading={saving}
+            disabled={saving}
+            icon={<Ionicons name="checkmark-outline" size={16} color="#ffffff" />}
+            style={styles.button}
+          >
+            Save Changes
+          </Button>
         </View>
-      )}
-      
-      <View style={styles.actions}>
-        <Button
-          variant="secondary"
-          onPress={onClose}
-          disabled={saving}
-          style={styles.button}
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="primary"
-          onPress={onSave}
-          loading={saving}
-          disabled={saving}
-          icon={<Ionicons name="checkmark-outline" size={16} color="#ffffff" />}
-          style={styles.button}
-        >
-          Save Changes
-        </Button>
       </View>
     </NeoModal>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    maxHeight: '100%',
+  },
+  scroll: {
+    flexShrink: 1,
+  },
+  scrollContent: {
+    gap: designTokens.spacing.md,
+    paddingBottom: designTokens.spacing.sm,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: designTokens.spacing.xs,
   },
   title: {
     fontSize: 20,
@@ -149,43 +171,42 @@ const styles = StyleSheet.create({
   },
   hint: {
     fontSize: 13,
-    marginBottom: designTokens.spacing.md,
   },
   dateChip: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
+    alignSelf: 'stretch',
+    paddingHorizontal: designTokens.spacing.md,
+    paddingVertical: designTokens.spacing.sm,
+    borderRadius: designTokens.borderRadius.sm,
     borderWidth: 1,
-    marginBottom: designTokens.spacing.md,
   },
   dateChipText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
+    textAlign: 'center',
   },
   formField: {
-    marginBottom: designTokens.spacing.md,
+    gap: designTokens.spacing.xs,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    marginBottom: designTokens.spacing.xs,
   },
   errors: {
     gap: 4,
-    marginVertical: designTokens.spacing.sm,
+    marginTop: designTokens.spacing.sm,
+    marginBottom: designTokens.spacing.xs,
   },
   error: {
     fontSize: 13,
   },
   actions: {
-    flexDirection: 'row',
-    gap: designTokens.spacing.md,
+    flexDirection: 'column',
+    gap: designTokens.spacing.sm,
     marginTop: designTokens.spacing.sm,
+    paddingTop: designTokens.spacing.sm,
+    borderTopWidth: 1,
   },
-  button: {
-    flex: 1,
-  },
+  button: { width: '100%' },
 });
 
 module.exports = EditEntryModal;
