@@ -75,8 +75,8 @@ function Button({
         borderColor: theme.colors.accent,
       },
       flat: {
-        backgroundColor: theme.name === 'dark' ? 'rgba(110, 231, 161, 0.10)' : 'rgba(31, 138, 77, 0.08)',
-        borderColor: theme.name === 'dark' ? 'rgba(110, 231, 161, 0.18)' : 'rgba(31, 138, 77, 0.12)',
+        backgroundColor: theme.name === 'dark' ? 'rgba(125, 166, 255, 0.10)' : 'rgba(47, 95, 167, 0.08)',
+        borderColor: theme.name === 'dark' ? 'rgba(125, 166, 255, 0.18)' : 'rgba(47, 95, 167, 0.12)',
         shadowOpacity: 0,
         elevation: 0,
       },

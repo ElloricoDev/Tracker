@@ -8,21 +8,21 @@ const lightTheme = {
   
   colors: {
     // Background colors
-    background: '#f3faf6',
+    background: '#f5f7fb',
     surface: '#ffffff',
     surfaceElevated: '#ffffff',
-    surfaceContainer: '#e4f3ea',
-    surfaceContainerHigh: '#d8ecdf',
-    surfaceContainerHighest: '#cde5d6',
+    surfaceContainer: '#e9eef7',
+    surfaceContainerHigh: '#dde6f3',
+    surfaceContainerHighest: '#d2ddec',
     
     // Primary colors
-    primary: '#1f8a4d',
-    primaryDark: '#17663a',
-    primaryLight: '#57b97c',
+    primary: '#2f5fa7',
+    primaryDark: '#244a82',
+    primaryLight: '#6f95d4',
     
     // Accent colors
-    accent: '#0f766e',
-    success: '#159957',
+    accent: '#4c8db5',
+    success: '#1f9d68',
     warning: '#f59e0b',
     error: '#ef4444',
     
@@ -37,15 +37,15 @@ const lightTheme = {
     iconSecondary: '#6b7280',
     
     // Border colors
-    border: '#c7dacd',
-    borderLight: '#dbe9df',
-    outline: '#aac7b1',
+    border: '#c6d2e1',
+    borderLight: '#dbe4ef',
+    outline: '#9eb4cc',
     scrim: 'rgba(17, 24, 39, 0.42)',
     
     // Status colors
-    info: '#0f766e',
-    infoBg: '#d8f2ed',
-    successBg: '#d7f4e1',
+    info: '#4c8db5',
+    infoBg: '#deedf7',
+    successBg: '#daf3e7',
     warningBg: '#fef3c7',
     errorBg: '#fee2e2',
   },
@@ -53,7 +53,7 @@ const lightTheme = {
   shadows: {
     // Neomorphism shadows - light source from top-left
     pressed: {
-      shadowColor: '#93b6a0',
+      shadowColor: '#a5b3c7',
       shadowOffset: { width: 4, height: 4 },
       shadowOpacity: 0.5,
       shadowRadius: 8,
@@ -70,7 +70,7 @@ const lightTheme = {
       },
       // Bottom-right dark shadow
       dark: {
-        shadowColor: '#9bb9a5',
+        shadowColor: '#b0bfd2',
         shadowOffset: { width: 6, height: 6 },
         shadowOpacity: 0.5,
         shadowRadius: 12,
@@ -84,14 +84,14 @@ const lightTheme = {
         shadowRadius: 8,
       },
       dark: {
-        shadowColor: '#a4c0ad',
+        shadowColor: '#b6c4d6',
         shadowOffset: { width: 4, height: 4 },
         shadowOpacity: 0.4,
         shadowRadius: 8,
       },
     },
     floating: {
-      shadowColor: '#8dad99',
+      shadowColor: '#a9b8cb',
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.3,
       shadowRadius: 16,
@@ -165,20 +165,20 @@ const darkTheme = {
   
   colors: {
     // Background colors
-    background: '#08130d',
-    surface: '#0f1c15',
-    surfaceElevated: '#15251d',
-    surfaceContainer: '#193026',
-    surfaceContainerHigh: '#1f3a2f',
-    surfaceContainerHighest: '#284839',
+    background: '#0f1724',
+    surface: '#182130',
+    surfaceElevated: '#1d2938',
+    surfaceContainer: '#223042',
+    surfaceContainerHigh: '#2a3950',
+    surfaceContainerHighest: '#324561',
     
     // Primary colors
-    primary: '#6ee7a1',
-    primaryDark: '#4fd18a',
-    primaryLight: '#a7f3c5',
+    primary: '#7da6ff',
+    primaryDark: '#5f87de',
+    primaryLight: '#adc4ff',
     
     // Accent colors
-    accent: '#2dd4bf',
+    accent: '#67c6d9',
     success: '#34d399',
     warning: '#fbbf24',
     error: '#f87171',
@@ -194,14 +194,14 @@ const darkTheme = {
     iconSecondary: '#94a3b8',
     
     // Border colors
-    border: '#264234',
-    borderLight: '#335545',
-    outline: '#5f8b76',
+    border: '#31435a',
+    borderLight: '#40526a',
+    outline: '#6581a4',
     scrim: 'rgba(2, 6, 23, 0.62)',
     
     // Status colors
-    info: '#5eead4',
-    infoBg: '#12352d',
+    info: '#67c6d9',
+    infoBg: '#183446',
     successBg: '#173e28',
     warningBg: '#3d2e1a',
     errorBg: '#3d1a1a',
@@ -218,7 +218,7 @@ const darkTheme = {
     },
     raised: {
       light: {
-        shadowColor: '#294238',
+        shadowColor: '#2d3b50',
         shadowOffset: { width: -6, height: -6 },
         shadowOpacity: 0.5,
         shadowRadius: 12,
@@ -232,7 +232,7 @@ const darkTheme = {
     },
     raisedSoft: {
       light: {
-        shadowColor: '#2c483d',
+        shadowColor: '#33455c',
         shadowOffset: { width: -4, height: -4 },
         shadowOpacity: 0.4,
         shadowRadius: 8,
