@@ -17,6 +17,7 @@ const Button = require('../../../components/common/Button');
 const AppIcon = require('../../../components/common/AppIcon');
 const DashboardStat = require('../components/DashboardStat');
 const ProgressSection = require('../components/ProgressSection');
+const StreakAchievements = require('../components/StreakAchievements');
 const MonthlyAttendanceHeatmap = require('../components/MonthlyAttendanceHeatmap');
 const TrendBarChart = require('../components/TrendBarChart');
 const { dateKeyFromDate } = require('../service');
@@ -199,6 +200,12 @@ function HomeScreen({
               </Text>
             </View>
           </View>
+
+          <StreakAchievements
+            currentStreakDays={dashboardInsights ? dashboardInsights.currentStreakDays : 0}
+            totalDurationMs={totalDurationMs}
+            requiredHours={requiredHours}
+          />
 
           <View style={styles.calendarWrap}>
             <MonthlyAttendanceHeatmap

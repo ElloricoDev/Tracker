@@ -13,6 +13,7 @@ const { useTheme } = require('../hooks/useTheme');
 const { useToast } = require('../hooks/useToast');
 const { designTokens } = require('../theme/tokens');
 const AppIcon = require('../components/common/AppIcon');
+const StreakCelebrationModal = require('../components/common/StreakCelebrationModal');
 const Toast = require('../components/common/Toast');
 const HomeScreen = require('../features/duty/screens/HomeScreen');
 const LogsScreen = require('../features/duty/screens/LogsScreen');
@@ -134,6 +135,8 @@ function AppTabs({
 function AppNavigator({ dutyService, settingsRepository, backupService }) {
   const { theme } = useTheme();
   const { toastMessage, toastType, toastVisible } = useToast();
+  const hasLoadedStreakRef = React.useRef(false);
+  const lastCelebratedStreakRef = React.useRef(0);
 
   const [sharedState, setSharedState] = React.useState({
     totalDurationMs: 0,
@@ -143,6 +146,8 @@ function AppNavigator({ dutyService, settingsRepository, backupService }) {
     todayEntry: null,
     dashboardInsights: null,
   });
+  const [celebrationStreakDays, setCelebrationStreakDays] = React.useState(0);
+  const [celebrationVisible, setCelebrationVisible] = React.useState(false);
 
   const handleRefresh = React.useCallback(async () => {
     const todayKey = dateKeyFromDate(new Date());
@@ -154,6 +159,22 @@ function AppNavigator({ dutyService, settingsRepository, backupService }) {
       dutyService.repository.getEntryByDate(todayKey),
     ]);
     const dashboardInsights = await dutyService.getDashboardInsights(targetHours);
+    const currentStreakDays = dashboardInsights ? dashboardInsights.currentStreakDays : 0;
+
+    if (!hasLoadedStreakRef.current) {
+      hasLoadedStreakRef.current = true;
+      lastCelebratedStreakRef.current = currentStreakDays >= 2 ? currentStreakDays : 0;
+    } else {
+      if (currentStreakDays < lastCelebratedStreakRef.current) {
+        lastCelebratedStreakRef.current = currentStreakDays >= 2 ? currentStreakDays : 0;
+      }
+
+      if (currentStreakDays >= 2 && currentStreakDays > lastCelebratedStreakRef.current) {
+        lastCelebratedStreakRef.current = currentStreakDays;
+        setCelebrationStreakDays(currentStreakDays);
+        setCelebrationVisible(true);
+      }
+    }
 
     setSharedState({
       totalDurationMs: totalMs,
@@ -191,6 +212,12 @@ function AppNavigator({ dutyService, settingsRepository, backupService }) {
         message={toastMessage}
         type={toastType}
         visible={toastVisible}
+      />
+
+      <StreakCelebrationModal
+        visible={celebrationVisible}
+        streakDays={celebrationStreakDays}
+        onClose={() => setCelebrationVisible(false)}
       />
     </>
   );

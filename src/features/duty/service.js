@@ -21,6 +21,24 @@ function startOfLocalMonth(date) {
   return value;
 }
 
+function isWeekend(date) {
+  const day = new Date(date).getDay();
+  return day === 0 || day === 6;
+}
+
+function isTrackedDay(date) {
+  return !isWeekend(date);
+}
+
+function nextTrackedStreakDateKey(dateKey) {
+  const cursor = new Date(`${dateKey}T12:00:00`);
+  do {
+    cursor.setDate(cursor.getDate() + 1);
+  } while (isWeekend(cursor));
+
+  return dateKeyFromDate(cursor);
+}
+
 function getMonthLabel(date) {
   return new Date(date).toLocaleDateString('en-US', {
     month: 'long',
@@ -132,7 +150,7 @@ function getStreaks(entriesSortedAsc) {
   for (let index = 1; index < entriesSortedAsc.length; index += 1) {
     const previous = entriesSortedAsc[index - 1];
     const current = entriesSortedAsc[index];
-    const previousKey = dateKeyFromDate(addDays(new Date(`${previous.dateKey}T12:00:00`), 1));
+    const previousKey = nextTrackedStreakDateKey(previous.dateKey);
     if (current.dateKey === previousKey) {
       runningStreak += 1;
       longestStreakDays = Math.max(longestStreakDays, runningStreak);
@@ -145,7 +163,7 @@ function getStreaks(entriesSortedAsc) {
   for (let index = entriesSortedAsc.length - 1; index > 0; index -= 1) {
     const current = entriesSortedAsc[index];
     const previous = entriesSortedAsc[index - 1];
-    const previousKey = dateKeyFromDate(addDays(new Date(`${previous.dateKey}T12:00:00`), 1));
+    const previousKey = nextTrackedStreakDateKey(previous.dateKey);
     if (current.dateKey === previousKey) {
       currentStreakDays += 1;
     } else if (current.dateKey !== previous.dateKey) {
@@ -154,6 +172,22 @@ function getStreaks(entriesSortedAsc) {
   }
 
   return { currentStreakDays, longestStreakDays };
+}
+
+function countTrackedDaysInRangeInclusive(startDate, endDate) {
+  const start = startOfLocalDay(startDate);
+  const end = startOfLocalDay(endDate);
+  let count = 0;
+  const cursor = new Date(start);
+
+  while (cursor <= end) {
+    if (isTrackedDay(cursor)) {
+      count += 1;
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return count;
 }
 
 class DutyService {
@@ -291,12 +325,13 @@ class DutyService {
     const entries = await this.repository.listAllEntries();
     const entriesAsc = [...entries].sort((left, right) => left.dateKey.localeCompare(right.dateKey));
     const monthlyEntries = entriesAsc.filter((entry) => entry.dateKey >= monthStartKey && entry.dateKey < nextMonthKey);
+    const trackedMonthlyEntries = monthlyEntries.filter((entry) => isTrackedDay(new Date(`${entry.dateKey}T12:00:00`)));
 
     const monthlyTotalMs = sumEntryDurationMs(monthlyEntries);
     const monthlyEntryCount = monthlyEntries.length;
     const monthlyAverageMs = monthlyEntryCount > 0 ? Math.floor(monthlyTotalMs / monthlyEntryCount) : 0;
-    const elapsedMonthDays = today.getDate();
-    const missedDays = Math.max(0, elapsedMonthDays - monthlyEntryCount);
+    const elapsedTrackedMonthDays = countTrackedDaysInRangeInclusive(monthStart, today);
+    const missedDays = Math.max(0, elapsedTrackedMonthDays - trackedMonthlyEntries.length);
 
     const totalDurationMs = sumEntryDurationMs(entriesAsc);
     const overallAverageMs = entriesAsc.length > 0 ? Math.floor(totalDurationMs / entriesAsc.length) : 0;
