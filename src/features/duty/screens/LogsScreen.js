@@ -95,6 +95,7 @@ function LogsScreen({ dutyService, onRefresh, route }) {
   const { theme } = useTheme();
   const { showToast } = useToast();
   const lastAppliedDashboardRouteRef = React.useRef('');
+  const scrollRef = React.useRef(null);
 
   const [dateKey, setDateKey] = React.useState(dateKeyFromDate(new Date()));
   const mainForm = useSessionForm();
@@ -201,6 +202,11 @@ function LogsScreen({ dutyService, onRefresh, route }) {
     setDashboardContextDismissed(false);
     setEntriesPage(0);
     setDateKey(selectedDateKey);
+    requestAnimationFrame(() => {
+      if (scrollRef.current && typeof scrollRef.current.scrollTo === 'function') {
+        scrollRef.current.scrollTo({ y: 0, animated: false });
+      }
+    });
   }, [
     route && route.params ? route.params.selectedDateKey : null,
     route && route.params ? route.params.entryContextSource : null,
@@ -343,6 +349,7 @@ function LogsScreen({ dutyService, onRefresh, route }) {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
       <ScrollView
+        ref={scrollRef}
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
