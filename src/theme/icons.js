@@ -18,7 +18,6 @@ const iconNames = {
   success: 'checkmark-circle-outline',
   empty: 'document-text-outline',
   quickAction: 'flash-outline',
-  summary: 'sparkles-outline',
   activity: 'pulse-outline',
   streak: 'flame-outline',
   forecast: 'rocket-outline',

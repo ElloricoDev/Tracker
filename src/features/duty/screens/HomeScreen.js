@@ -1,6 +1,6 @@
 /**
  * Dashboard Screen
- * Progress overview, summary, and quick actions.
+ * Progress overview and quick actions.
  */
 
 const React = require('react');
@@ -50,18 +50,31 @@ function formatShortDate(dateKey) {
   });
 }
 
+function buildSessionLabel(label, timeIn, timeOut) {
+  if (timeIn && timeOut) {
+    return `${label} ${timeIn} - ${timeOut}`;
+  }
+
+  if (timeIn) {
+    return `${label} In ${timeIn}`;
+  }
+
+  if (timeOut) {
+    return `${label} Out ${timeOut}`;
+  }
+
+  return null;
+}
+
 function buildSessionSummary(entry) {
   if (!entry) {
     return 'No entry logged yet.';
   }
 
-  const sessions = [];
-  if (entry.amIn && entry.amOut) {
-    sessions.push(`AM ${entry.amIn} - ${entry.amOut}`);
-  }
-  if (entry.pmIn && entry.pmOut) {
-    sessions.push(`PM ${entry.pmIn} - ${entry.pmOut}`);
-  }
+  const sessions = [
+    buildSessionLabel('AM', entry.amIn, entry.amOut),
+    buildSessionLabel('PM', entry.pmIn, entry.pmOut),
+  ].filter(Boolean);
 
   return sessions.length > 0 ? sessions.join('  •  ') : 'Incomplete session saved.';
 }
@@ -83,9 +96,13 @@ function HomeScreen({
     }, [onRefresh])
   );
 
-  const remainingMs = Math.max(0, (requiredHours * 3600000) - totalDurationMs);
   const todayDateKey = dateKeyFromDate(new Date());
   const currentWeekStartDateKey = dateKeyFromDate(startOfLocalWeekMonday(new Date()));
+  const filteredRecentEntries = React.useMemo(
+    () => recentEntries.filter((entry) => entry.dateKey !== todayDateKey),
+    [recentEntries, todayDateKey]
+  );
+  const hasMonthlyEntries = Boolean(dashboardInsights && dashboardInsights.monthlyEntryCount > 0);
   const handleSelectDashboardDate = React.useCallback((selectedDateKey) => {
     navigation.navigate('Entries', { selectedDateKey, entryContextSource: 'dashboard' });
   }, [navigation]);
@@ -115,22 +132,6 @@ function HomeScreen({
           requiredHours={requiredHours}
           formatHours={formatHoursAndMinutes}
         />
-
-        <SectionCard
-          title="Summary"
-          subtitle="The key numbers that matter right now."
-          icon="summary"
-        >
-          <View style={styles.statsGrid}>
-            <DashboardStat label="Completed" value={formatHoursAndMinutes(totalDurationMs)} />
-            <DashboardStat label="Required" value={`${requiredHours}h`} />
-            <DashboardStat
-              label="Remaining"
-              value={formatHoursAndMinutes(remainingMs)}
-              tone={remainingMs > 0 ? 'warning' : 'success'}
-            />
-          </View>
-        </SectionCard>
 
         <SectionCard
           title="Monthly Insights"
@@ -208,13 +209,23 @@ function HomeScreen({
           />
 
           <View style={styles.calendarWrap}>
-            <MonthlyAttendanceHeatmap
-              calendar={dashboardInsights ? dashboardInsights.monthCalendar : null}
-              onSelectDate={handleSelectDashboardDate}
-            />
-            <Text style={[styles.calendarHint, { color: theme.colors.textSecondary }]}>
-              Tap a day to open it in Entries. Stronger fill means more logged hours.
-            </Text>
+            {hasMonthlyEntries ? (
+              <>
+                <MonthlyAttendanceHeatmap
+                  calendar={dashboardInsights ? dashboardInsights.monthCalendar : null}
+                  onSelectDate={handleSelectDashboardDate}
+                />
+                <Text style={[styles.calendarHint, { color: theme.colors.textSecondary }]}>
+                  Tap a day to open it in Entries. Stronger fill means more logged hours.
+                </Text>
+              </>
+            ) : (
+              <EmptyState
+                icon="calendarStats"
+                title="No monthly records yet"
+                message="Save at least one entry this month to see the attendance heatmap."
+              />
+            )}
           </View>
 
           <View style={styles.trendsWrap}>
@@ -275,14 +286,16 @@ function HomeScreen({
           subtitle="Your latest saved records."
           icon="activity"
         >
-          {recentEntries.length === 0 ? (
+          {filteredRecentEntries.length === 0 ? (
             <EmptyState
               title="No recent activity"
-              message="Once you save your first entry, the latest records will appear here."
+              message={todayEntry
+                ? 'Today is already shown above. Save another day to build a recent history list.'
+                : 'Once you save your first entry, the latest records will appear here.'}
             />
           ) : (
             <View style={styles.activityList}>
-              {recentEntries.map((entry) => (
+              {filteredRecentEntries.map((entry) => (
                 <View
                   key={entry.dateKey}
                   style={[
